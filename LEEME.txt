@@ -1,0 +1,6 @@
+CASITA SIM - como instalarlo en el celular
+1) Sube TODOS estos archivos (index.html, manifest.json, sw.js, icon-192.png, icon-512.png) a un hosting con https gratis: GitHub Pages, Netlify (arrastrar carpeta) o Cloudflare Pages.
+2) Abre el enlace en Chrome (Android) o Safari (iPhone).
+3) Android: menu ⋮ > "Instalar aplicacion". iPhone: Compartir > "Añadir a pantalla de inicio".
+Despues de abrirlo una vez con internet, funciona tambien sin conexion (el multijugador si necesita internet).
+No funciona instalado si abres index.html directo desde archivos: necesita estar en https.

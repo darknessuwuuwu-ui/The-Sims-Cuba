@@ -1,0 +1,5 @@
+var C='casita-v1',U=['./','index.html','manifest.json','icon-192.png','icon-512.png','https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'];
+self.addEventListener('install',function(e){e.waitUntil(caches.open(C).then(function(c){return Promise.all(U.map(function(u){return c.add(u).catch(function(){});}));}).then(function(){return self.skipWaiting();}));});
+self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==C;}).map(function(x){return caches.delete(x);}));}).then(function(){return self.clients.claim();}));});
+self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;var u=e.request.url;if(u.indexOf('peerjs')>=0||u.indexOf('peerjs.com')>=0)return;
+e.respondWith(fetch(e.request).then(function(r){if(r&&r.ok){var k=r.clone();caches.open(C).then(function(c){c.put(e.request,k);});}return r;}).catch(function(){return caches.match(e.request).then(function(m){return m||caches.match('index.html');});}));});
