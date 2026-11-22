@@ -153,43 +153,71 @@ body.pvw #top,body.pvw #bph2,body.pvw #bmn,body.pvw #bctr,body.pvw #toast,body.p
 .apps button:nth-child(1){background:#315b9d}.apps button:nth-child(2){background:#167d70}.apps button:nth-child(3){background:#a35b35}.apps button:nth-child(4){background:#7953a6}.apps button:nth-child(5){background:#397b55}.apps button:nth-child(6){background:#252525;border:1px solid #555}.apps button:nth-child(7){background:#426b9d}
 #minimap{position:absolute;z-index:5;top:10px;left:10px;width:166px;padding:7px;background:rgba(13,22,51,.94);border:1px solid #4562c8;border-radius:12px;box-sizing:border-box;pointer-events:none}
 #minimap b{display:block;font-size:11px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#minimap canvas{position:static;width:150px;height:112px;border-radius:6px;background:#b9d8bd;display:block}
+
+#savedCards .save-card{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;border:1px solid #4059a8;border-radius:12px;background:linear-gradient(120deg,#172b62,#101a3d);cursor:pointer}#savedCards .save-card b{display:block}#savedCards .save-card small{display:block;color:#c6d2ff;margin-top:3px}#savedCards .save-card button{width:auto;margin:0;padding:8px 12px}#menu .back-row{margin-top:8px}
+/* Menú principal: ocultar toda la interfaz de juego hasta pulsar Continuar. */
+body:has(#menu:not([hidden])) #top,
+body:has(#menu:not([hidden])) #fpsCounter,
+body:has(#menu:not([hidden])) #gameTimeHud,
+body:has(#menu:not([hidden])) #moneyHud,
+body:has(#menu:not([hidden])) #eventTimers,
+body:has(#menu:not([hidden])) #needsHud,
+body:has(#menu:not([hidden])) #card,
+body:has(#menu:not([hidden])) #bph2,
+body:has(#menu:not([hidden])) #bmn,
+body:has(#menu:not([hidden])) #bctr,
+body:has(#menu:not([hidden])) #toast,
+body:has(#menu:not([hidden])) #trip,
+body:has(#menu:not([hidden])) #minimap,
+body:has(#menu:not([hidden])) #labels,
+body:has(#menu:not([hidden])) #sheet,
+body:has(#menu:not([hidden])) #panel,
+body:has(#menu:not([hidden])) #mg {
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
 </style>
 <style>.mp-tabs{display:flex;gap:6px;margin:8px 0}.mp-tabs button{flex:1;opacity:.6}.mp-tabs button.act{opacity:1;outline:2px solid #4562c8}#mpof textarea{width:100%;box-sizing:border-box;height:72px;font-size:11px;margin:4px 0;border-radius:8px;background:#0d1633;color:#fff;border:1px solid #4562c8;padding:6px;word-break:break-all}#mpof p,#mpof small{font-size:12px;margin:4px 0;display:block}#mpof button{width:100%;margin:3px 0}</style>
+
 <div id="menu"><div class="box">
-  <h1>The Sims <b>Cuba</b></h1><p>Vive en Cuba, solo o con amigos</p>
-  <input id="mname" maxlength="14" placeholder="Tu nombre">
-  <div id="mgame" hidden><div class="grid"><button id="bph">📱 Mi celular</button><button id="bch">💬 Chat</button><button id="bho">🏠 Ir a casa</button><button id="bea" hidden>🍴 Comer</button></div><button class="pri" id="mcont2">▶ Continuar</button></div>
-  <button id="mchb">🎨 Rediseñar personaje</button>
-  <div id="moff">
-    <button class="pri" id="msolo">🏠 Jugar solo</button>
-    <button id="mmpb">👥 Multijugador</button>
+  <h1>The Sims <b>Cuba</b></h1><p id="menuSubtitle">Vive en Cuba, solo o con amigos</p>
+  <div id="menuMain">
+    <button class="pri" id="menuNew">＋ Nueva partida</button>
+    <button id="menuSaves">▤ Partidas guardadas</button>
+    <button id="menuMulti">👥 Multijugador</button>
+  </div>
+  <div id="menuNewView" hidden>
+    <h2>＋ Nueva partida</h2>
+    <input id="mname" maxlength="14" placeholder="Nombre de tu personaje">
+    <input id="saveName" maxlength="24" placeholder="Nombre de la partida" style="margin-top:7px">
+    <div class="msg" style="text-align:left;margin:8px 0"><b>Configuración</b><br><label style="display:flex;align-items:center;gap:8px;margin-top:8px"><input id="newMP" type="checkbox" style="width:auto;margin:0"> Partida multijugador</label><small>Las partidas multijugador requieren al menos 2 jugadores conectados.</small></div>
+    <button id="newCharacter">🎨 Crear personaje</button>
+    <button class="pri" id="createNewGame">▶ Crear partida</button>
+    <button class="sec menuBack">‹ Volver</button>
+  </div>
+  <div id="menuSavesView" hidden>
+    <h2>▤ Partidas guardadas</h2>
+    <div id="savedCards" style="display:grid;gap:9px;text-align:left"></div>
+    <button class="sec menuBack">‹ Volver</button>
   </div>
   <div id="mmp" hidden>
-    <div class="mp-head"><span class="mp-icon">👥</span><h2>Multijugador</h2><p>Elige cómo jugar con otras personas.</p></div>
+    <div class="mp-head"><span class="mp-icon">👥</span><h2>Multijugador</h2><p>Conéctate con otra persona o crea una sala.</p></div>
     <div class="mp-tabs"><button id="tabon" class="act">🌐 Online</button><button id="tabof">📶 Offline</button></div>
     <div id="mpon">
-    <button id="mhost" class="mp-option mp-create"><span class="mp-symbol">＋</span><span><b>Crear partida</b><small>Abre una sala y comparte el código.</small></span><span class="mp-arrow">›</span></button>
-    <div class="mp-join">
-      <label for="mjc">Unirse a una partida</label>
-      <div class="row"><input id="mjc" maxlength="4" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase"><button id="mjoin">Entrar</button></div>
-      <small>Escribe el código de 4 letras del anfitrión.</small>
-    </div></div>
-    <div id="mpof" hidden>
-      <small>Sin internet: ejecuta server.py en Termux o PC. Todos deben abrir la dirección del servidor usando la misma Wi-Fi o hotspot.</small>
-      <input id="ofip" placeholder="IP del servidor (ej. 192.168.1.5)" hidden>
-      <button class="pri" id="ofhost">＋ Crear sala offline</button><button id="ofjoin">Unirme a sala offline</button>
-      <small id="ofs"></small>
+      <button class="mp-option mp-create" id="mhost"><span class="mp-symbol">＋</span><span><b>Crear partida</b><small>Abre una sala y comparte el código.</small></span><span class="mp-arrow">›</span></button>
+      <div class="mp-join"><label for="mjc">Unirse a una partida</label><div class="row"><input id="mjc" maxlength="4" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase"><button id="mjoin">Entrar</button></div><small>Escribe el código de 4 letras del anfitrión.</small></div>
     </div>
-    <button class="sec" id="mmpx">‹ Volver al menú</button>
+    <div id="mpof" hidden>
+      <small>Conéctate por la misma Wi-Fi o hotspot. Para unirte, escribe la IP del equipo que ejecuta server.py (puerto 8000).</small>
+      <label for="ofip" style="display:block;text-align:left;margin:10px 0 4px;font-weight:700">IP del servidor</label>
+      <input id="ofip" placeholder="Ej. 192.168.1.5:8000" autocomplete="url" autocapitalize="off" spellcheck="false" style="display:block;width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #3856b5;background:#10193f;color:#fff;margin:6px 0 10px">
+      <button class="pri" id="ofhost">＋ Crear sala offline</button><button id="ofjoin">Unirme por IP</button><small id="ofs"></small>
+    </div>
+    <button class="sec menuBack">‹ Volver</button>
   </div>
   <div id="mch" hidden></div>
-  <div id="mon" hidden>
-    <p>Sala activa · <b id="mcnt">1</b> jugador(es)</p><div class="code" id="mcode"></div>
-    <p id="mhint">Pásale este código a tus amigos</p>
-    <button class="pri" id="mcont">▶ Continuar</button><button class="sec" id="mleave">Salir de la sala</button>
-  </div>
-  <button class="sec" id="mreset">🗑 Empezar de nuevo</button>
-  <div id="mst"></div>
+  <div id="mon" hidden><p>Sala activa · <b id="mcnt">1</b> jugador(es)</p><div class="code" id="mcode"></div><p id="mhint">Pásale este código a tus amigos</p><button class="pri" id="mcont">▶ Entrar al mundo (2 jugadores)</button><button class="sec" id="mleave">Salir de la sala</button></div>
+  <div id="mst" hidden></div>
 </div></div>
 <div id="top">
   <div class="brand">The Sims <b>Cuba</b></div>
@@ -222,6 +250,7 @@ body.pvw #top,body.pvw #bph2,body.pvw #bmn,body.pvw #bctr,body.pvw #toast,body.p
   </div>
   <div id="card" hidden><b id="ct"></b><button id="go"></button><button id="go2" hidden></button></div>
   <button id="bph2">📱</button><button id="bmn">☰</button><button id="bctr">🎯</button>
+  <div id="legacyUiHooks" hidden><button id="bph"></button><button id="bch"></button><button id="bho"></button><button id="bea"></button></div>
   <div id="toast"></div><div id="trip" hidden><div id="tt"></div><div id="tripscene"><div id="hills"></div><div id="car3d"><div class="carbody"><i></i><i></i></div><b class="carwheel left"></b><b class="carwheel right"></b></div><div id="bus3d"><div class="body"></div><div class="windows"></div><div class="wheel"></div></div></div><div class="bar2" style="margin:8px auto 0;width:220px"><i id="tb"></i></div></div><div id="minimap" hidden><b id="minititle">Ruta</b><canvas id="minicanvas" width="150" height="112"></canvas></div>
   <div id="sheet" hidden><div class="panel" id="panel"></div></div>
   <div id="mg" hidden><div class="mgb"><div class="mgh" id="mgh"></div><p style="margin:0 0 8px;color:var(--mute)">Toca un plato y luego al cliente que lo pidió.</p><div class="mgs" id="mgs"></div><div class="mgd" id="mgd"></div><button id="mgx">Terminar turno</button></div></div>
@@ -1183,7 +1212,7 @@ function swing(p,t,on){var lg=p.userData.legs;if(p.userData.vh>0&&(p!==sim||cur=
 var fpsFrames=0,fpsLast=0,fpsValue=0,lastCityPower=null,lastBlackoutState=null;
 function frame(now){
   fpsFrames++;if(!fpsLast)fpsLast=now;var fpsElapsed=now-fpsLast;if(fpsElapsed>=500){fpsValue=Math.round(fpsFrames*1000/fpsElapsed);fpsFrames=0;fpsLast=now;var fe=$('fpsCounter');if(fe)fe.textContent='FPS: '+fpsValue;}
-  var dt=Math.min((now-last)/1000,.1);last=now;
+  var dt=Math.min((now-last)/1000,.1);last=now;if(typeof menu!=='undefined'&&!menu.hidden)dt=0; // Pausa reloj, necesidades, acciones y movimiento en el menú.
   gm+=(act&&act.k.sleep?14.4:1.2)*dt; // 24 horas del juego = 20 minutos reales; dormir acelera el reloj 12 veces.
   STATS.forEach(function(s){needs[s[0]]=clamp(needs[s[0]]-s[3]*dt*.1*(s[0]==='energy'?1-Math.min(.6,GYM.str*.03):1),0,100);});
   if(needs.hunger<15)needs.health=clamp(needs.health-.2*dt,0,100);
@@ -1326,14 +1355,13 @@ var NET={peer:null,conns:{},host:false,code:'',id:'',on:false,busy:''},RM={},CHL
 var menu=$('menu'),mst=$('mst'),started=false,mview='main';
 function nplayers(){return Object.keys(RM).length+1;}
 function paintMenu(){
-  $('mname').value=myName;
-  $('mon').hidden=!NET.on;$('moff').hidden=NET.on;$('mgame').hidden=!started;$('msolo').hidden=started;$('mcont2').hidden=NET.on;
+  $('mon').hidden=!NET.on;
+  $('menuMain').hidden=mview!=='main'||NET.on;$('menuNewView').hidden=mview!=='new'||NET.on;$('menuSavesView').hidden=mview!=='saves'||NET.on;
+  $('mmp').hidden=mview!=='mp'||NET.on;$('mch').hidden=mview!=='ch';
+  menu.classList.toggle('ed',mview==='ch');pvw=mview==='ch';document.body.classList.toggle('pvw',pvw);
   $('mcode').textContent=NET.off?(NET.addr||'📶 OFFLINE'):NET.code;$('mcnt').textContent=nplayers();$('mhint').textContent=NET.off?(NET.host?'Tus amigos abren esa dirección en su navegador (misma WiFi) y eligen Multijugador → Offline → Unirme':'Conectado a la sala offline'):'Pásale este código a tus amigos';$('mcode').style.fontSize=NET.off?'14px':'';$('mcode').style.whiteSpace=NET.off?'pre-line':'';
-  if(NET.on&&mview==='mp'&&!(NET.off&&NET.host))mview='main';
-  var mm=mview==='main';menu.classList.toggle('ed',mview==='ch');pvw=mview==='ch';document.body.classList.toggle('pvw',pvw);
-  if(!mm){['mgame','moff','mon','mchb','mreset'].forEach(function(i){$(i).hidden=true;});}
-  $('mmp').hidden=mview!=='mp';$('mch').hidden=mview!=='ch';$('mchb').hidden=!mm;$('mreset').hidden=!mm;
-  mst.textContent=NET.busy;
+  $('mst').textContent=NET.busy||'';$('mst').hidden=!NET.busy;
+  if(mview==='saves')renderSavedCards();
 }
 var PAL={shirt:[0x2f5bea,0xe0282e,0x1fa35c,0xe0a020,0x9b4fd6,0x14a7b8,0xffffff,0x222222,0xff7aa8,0xf08a24],pants:[0x2d3e6b,0x222222,0x6b4a2a,0x556b2f,0x8b0000,0xc9c9c9],hair:[0x3a2a1e,0x111111,0xd8b060,0xb5532a,0xeeeeee,0x6b3fa0,0x2f5bea],shoes:[0x2a2220,0xffffff,0xe0282e,0x2f5bea,0x2fa86b],skin:[0xf5d5b5,0xf0c8a0,0xd9a273,0x9a6a45,0x6b4430]};
 function buildCh(){var h='<h3 style="margin:4px 0">🎨 Rediseñar personaje</h3>';
@@ -1341,14 +1369,22 @@ function buildCh(){var h='<h3 style="margin:4px 0">🎨 Rediseñar personaje</h3
   h+='<p style="margin:2px 0">Peinado</p><div class="sws">'+['Corto','Largo','Calvo'].map(function(n,i){return '<button class="o'+(LOOK.hs===i?' on':'')+'" data-r="hs" data-c="'+i+'">'+n+'</button>';}).join('')+'</div>';
   h+='<p style="margin:2px 0">Estatura</p><div class="sws">'+[['Baja',.88],['Normal',1],['Alta',1.12]].map(function(n){return '<button class="o'+(LOOK.sz===n[1]?' on':'')+'" data-r="sz" data-c="'+n[1]+'">'+n[0]+'</button>';}).join('')+'</div><button class="pri" id="mchx">✔ Listo</button>';
   $('mch').innerHTML=h;}
-$('mchb').onclick=function(){mview='ch';pth=heading+.5;pph=.15;pd=3.4;buildCh();paintMenu();};
-$('mmpb').onclick=function(){mview='mp';paintMenu();};$('mmpx').onclick=function(){mview='main';paintMenu();};
+$('newCharacter').onclick=function(){mview='ch';buildCh();paintMenu();};
+$('menuNew').onclick=function(){mview='new';$('mname').value=myName;$('saveName').value='';paintMenu();};
+$('menuSaves').onclick=function(){mview='saves';paintMenu();};
+$('menuMulti').onclick=function(){mview='mp';paintMenu();};
+document.querySelectorAll('.menuBack').forEach(function(b){b.onclick=function(){mview='main';paintMenu();};});
 $('mch').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
-  if(b.id==='mchx'){saveName();try{saveGame();}catch(er){}mview='main';paintMenu();return;}
+  if(b.id==='mchx'){saveName();mview='new';paintMenu();return;}
   var k=b.dataset.r,c=+b.dataset.c;if(!k)return;
   if(k==='hs'){LOOK.hs=c;applyStyle();}else if(k==='sz'){LOOK.sz=c;applyStyle();}else{setLook(k,c);if(k==='shirt')myCol=c;}
   buildCh();});
 function showMenu(){menu.hidden=false;mview='main';paintMenu();}
+$('createNewGame').onclick=function(){
+ var name=$('mname').value.trim().slice(0,14)||'Cubita',gameName=$('saveName').value.trim().slice(0,24)||('Partida '+ACTIVE_SLOT),isMP=$('newMP').checked;
+ try{localStorage.setItem('casita.slotName.'+ACTIVE_SLOT,gameName);localStorage.setItem('casita.n',name);localStorage.setItem('casita.activeSlot',String(ACTIVE_SLOT));localStorage.setItem('casita.slotMode.'+ACTIVE_SLOT,isMP?'mp':'solo');localStorage.removeItem('casita.save2.slot'+ACTIVE_SLOT);localStorage.setItem('casita.pendingNew','1');localStorage.setItem('casita.pendingMP',isMP?'1':'0');localStorage.setItem('casita.pendingLook',JSON.stringify(LOOK));}catch(e){}
+ myName=name;location.reload();
+};
 function saveName(){var v=$('mname').value.trim().slice(0,14)||'Cubita';myName=v;simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+v+(IS_ADMIN?' [ADM]':'');if(simLab.el)simLab.el.style.color=IS_ADMIN?'#ffd34d':'';try{localStorage.setItem('casita.n',v);}catch(e){}}
 var PCFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]}};
 function loadPeer(){
@@ -1376,7 +1412,7 @@ function netUp(code,host){started=true;NET.on=true;NET.host=host;NET.code=code;N
 function leave(msg){
   try{if(NET.peer)NET.peer.destroy();}catch(e){}
   Object.keys(RM).forEach(dropRemote);
-  NET.peer=null;NET.conns={};NET.on=false;NET.off=false;NET.host=false;NET.code='';NET.busy='';paintMenu();if(msg)toast(msg);
+  NET.peer=null;NET.conns={};NET.on=false;NET.off=false;NET.host=false;NET.code='';NET.busy='';mview='main';paintMenu();if(msg)toast(msg);
 }
 function hostOn(c){
   c.on('data',function(d){d.f=c.peer;onData(d);send(d,c.peer);});
@@ -1388,7 +1424,7 @@ function createRoom(){
     var tries=0;(function go(){
       var code='';for(var i=0;i<4;i++)code+=String.fromCharCode(65+Math.floor(Math.random()*26));
       var p=new Peer('casita-'+code,PCFG);p.on('disconnected',function(){try{p.reconnect();}catch(e){}});
-      p.on('open',function(id){NET.peer=p;NET.id='H';netUp(code,true);menu.hidden=true;toast('Sala '+code+' creada');});
+      p.on('open',function(id){NET.peer=p;NET.id='H';netUp(code,true);menu.hidden=false;mview='mp';paintMenu();toast('Sala '+code+' creada. Esperando al segundo jugador…');});
       p.on('connection',function(c){c.on('open',function(){NET.conns[c.peer]=c;hostOn(c);toast('Entró un jugador');});});
       p.on('error',function(er){if(er&&er.type==='unavailable-id'&&tries++<4){go();return;}if(!NET.on){NET.busy='No se pudo crear la sala ('+(er&&er.type||'error')+'). Revisa tu conexión.';paintMenu();}});
     })();
@@ -1403,7 +1439,7 @@ function joinRoom(code){
     p.on('error',function(er){fail(er&&er.type==='peer-unavailable'?'No existe esa sala.':'No se pudo conectar ('+(er&&er.type||'error')+').');});
     p.on('open',function(id){
       var c=p.connect('casita-'+code,{reliable:true});
-      c.on('open',function(){if(done)return;done=true;clearTimeout(to);NET.peer=p;NET.id=id;NET.conns={H:c};netUp(code,false);menu.hidden=true;toast('Entraste a la sala '+code);});
+      c.on('open',function(){if(done)return;done=true;clearTimeout(to);NET.peer=p;NET.id=id;NET.conns={H:c};netUp(code,false);menu.hidden=false;mview='mp';paintMenu();toast('Entraste a la sala '+code+'. Pulsa continuar cuando haya 2 jugadores.');});
       c.on('data',function(d){onData(d);});
       c.on('close',function(){if(NET.on)leave('La sala se cerró');});
     });
@@ -1414,16 +1450,15 @@ var OFT=[],OFH={},OFQ=[],OFB='';
 function mpTab(t){$('mpon').hidden=t!=='on';$('mpof').hidden=t!=='of';$('tabon').classList.toggle('act',t==='on');$('tabof').classList.toggle('act',t==='of');}
 $('tabon').onclick=function(){mpTab('on');};$('tabof').onclick=function(){mpTab('of');};
 function ofst(t){$('ofs').textContent=t||'';}
-if(location.protocol==='file:')$('ofip').hidden=false;
-function ofBase(){if(location.protocol!=='file:')return '';var ip=$('ofip').value.trim().replace(/^https?:\/\//,'').replace(/[:\/].*$/,'');return ip?'http://'+ip+':8000':null;}
+function ofBase(){var raw=($('ofip').value||'').trim();if(!raw)return location.protocol==='file:'?null:location.origin;if(!/^https?:\/\//i.test(raw))raw='http://'+raw;try{var u=new URL(raw);if(!u.port)u.port='8000';return u.origin;}catch(e){return null;}}
 function ofPost(p,o){return fetch(OFB+p,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o||{})}).then(function(r){return r.json();});}
 function ofGet(p){return fetch(OFB+p).then(function(r){return r.json();});}
 function ofKill(){OFT.forEach(clearInterval);OFT=[];OFQ=[];OFH={};}
 function ofLoop(f,ms){var b=0;OFT.push(setInterval(function(){if(b)return;b=1;try{f(function(){b=0;});}catch(e){b=0;}},ms));}
-$('ofhost').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe la IP del servidor.');saveName();ofst('Conectando al servidor…');
+$('ofhost').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe una IP válida, por ejemplo 192.168.1.5:8000.');saveName();ofst('Conectando al servidor…');
   ofPost('/r/host').then(function(r){
     NET.peer={destroy:function(){var k=ofKill;ofPost('/r/close').catch(function(){});k();}};NET.id='H';NET.off=true;
-    NET.addr=(r.ips||[]).map(function(i){return 'http://'+i+':'+(r.port||8000);}).join('\n');mview='main';netUp('OFFLINE',true);toast('Sala offline creada');
+    NET.addr=(r.ips||[]).map(function(i){return 'http://'+i+':'+(r.port||8000);}).join('\n');mview='mp';netUp('OFFLINE',true);toast('Sala offline creada');
     ofLoop(function(done){ofGet('/r/poll?h=1').then(function(r){(r.ev||[]).forEach(function(e){
       if(e.k==='open'){var id='L'+e.cid,h={},c={peer:id,open:true,send:function(d){OFQ.push({cid:e.cid,m:d});},on:function(k,f){h[k]=f;}};OFH[e.cid]=h;NET.conns[id]=c;hostOn(c);toast((e.name||'Un jugador')+' entró');paintMenu();}
       else if(e.k==='msg'){var h2=OFH[e.cid];if(h2&&h2.data)h2.data(e.m);}
@@ -1431,19 +1466,18 @@ $('ofhost').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe l
     });}).catch(function(){}).then(done);},90);
     ofLoop(function(done){if(OFQ.length){var b=OFQ;OFQ=[];ofPost('/r/h',{b:b}).catch(function(){}).then(done);}else done();},100);
   }).catch(function(){ofst('No se encontró el servidor. ¿Está corriendo server.py?');});};
-$('ofjoin').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe la IP del servidor.');saveName();ofst('Conectando…');
+$('ofjoin').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe una IP válida, por ejemplo 192.168.1.5:8000.');saveName();ofst('Conectando…');
   ofPost('/r/join',{name:myName}).then(function(r){if(!r.cid){ofst('No hay una sala abierta o está llena.');return;}
     var cid=r.cid,c={peer:'H',open:true,send:function(d){OFQ.push(d);},on:function(){}};
     NET.peer={destroy:function(){var k=ofKill;ofPost('/r/g',{cid:cid,close:1}).catch(function(){});k();}};NET.id='L'+cid;NET.conns={H:c};NET.off=true;NET.addr='';
-    netUp('OFFLINE',false);menu.hidden=true;toast('Entraste a la sala offline');
+    netUp('OFFLINE',false);menu.hidden=false;mview='mp';paintMenu();toast('Entraste a la sala offline. Espera al segundo jugador.');
     ofLoop(function(done){ofGet('/r/poll?c='+cid).then(function(x){(x.ev||[]).forEach(function(e){if(e.close){if(NET.on)leave('La sala se cerró');}else if(e.m)onData(e.m);});}).catch(function(){}).then(done);},90);
     ofLoop(function(done){var q=OFQ;OFQ=[];q.forEach(function(m){ofPost('/r/g',{cid:cid,m:m}).catch(function(){});});done();},120);
   }).catch(function(){ofst('No se encontró el servidor. ¿Misma WiFi y server.py abierto?');});};
-$('msolo').onclick=function(){started=true;saveName();menu.hidden=true;};$('mcont2').onclick=function(){saveName();menu.hidden=true;};['bph','bch','bho','bea'].forEach(function(i){$(i).addEventListener('click',function(){menu.hidden=true;});});
 $('mhost').onclick=createRoom;
 $('mjoin').onclick=function(){joinRoom($('mjc').value);};
-$('mcont').onclick=function(){saveName();menu.hidden=true;};
-$('mleave').onclick=function(){leave('Saliste de la sala');};
+$('mcont').onclick=function(){if(!NET.on||nplayers()<2){$('mhint').textContent='Se necesitan al menos 2 jugadores conectados.';return;}saveName();menu.hidden=true;started=true;};
+$('mleave').onclick=function(){leave('Saliste de la sala');mview='main';paintMenu();};
 $('bctr').onclick=function(){free=false;};$('bmn').onclick=function(){closeSheet();showMenu();};
 function adminClone(o){return JSON.parse(JSON.stringify(o||{}));}
 function paintAdminName(){simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+myName+(IS_ADMIN?' [ADM]':'');if(simLab.el)simLab.el.style.color=IS_ADMIN?'#ffd34d':'';}
@@ -1755,8 +1789,7 @@ function sfx(n){
   else if(n==='cricket'){for(i=0;i<3;i++)tone(4200,.03,'sine',.012,0,i*.07);}
   else if(n==='horn'){tone(420,.35,'square',.03);tone(525,.35,'square',.025);}
 }
-var bs=document.createElement('button');bs.id='bsnd';bs.textContent='🔊';bs.style.cssText='position:absolute;top:auto;bottom:max(14px,env(safe-area-inset-bottom,0px));left:max(154px,calc(env(safe-area-inset-left,0px) + 154px));right:auto;z-index:7;width:40px;height:40px;border-radius:13px;border:1px solid #243170;background:rgba(15,26,68,.92);color:#fff;font-size:20px;cursor:pointer';
-bs.onclick=function(){initAudio();muted=!muted;bs.textContent=muted?'🔇':'🔊';if(master)master.gain.value=muted?0:.8;};stage.appendChild(bs);
+// Botón de sonido eliminado del HUD; el audio conserva su configuración guardada.
 setInterval(function(){
   if(!ctx||muted)return;var hr=(gm/60)%24,day=hr>=6&&hr<19,city=cur===CITY&&!trip;
   if(trafG)trafG.gain.setTargetAtTime(city?.03:.004,ctx.currentTime,.4);
@@ -1824,7 +1857,27 @@ setInterval(function(){
 },2000);
 
 // ---------- nuevo: guardado, música, ropa, piscina, granjas y restaurante ----------
-var SK='casita.save2',RESET=false;
+var ACTIVE_SLOT=1;try{ACTIVE_SLOT=Math.max(1,Math.min(3,parseInt(localStorage.getItem('casita.activeSlot')||'1',10)||1));}catch(e){}
+try{if(!localStorage.getItem('casita.save2.slot1')&&localStorage.getItem('casita.save2'))localStorage.setItem('casita.save2.slot1',localStorage.getItem('casita.save2'));}catch(e){}
+var SK='casita.save2.slot'+ACTIVE_SLOT,RESET=false;
+function slotMode(){try{return localStorage.getItem('casita.slotMode.'+ACTIVE_SLOT)|| (ACTIVE_SLOT===2?'mp':'solo');}catch(e){return ACTIVE_SLOT===2?'mp':'solo';}}
+function renderSavedCards(){
+ var host=$('savedCards');if(!host)return;host.innerHTML='';
+ for(var n=1;n<=3;n++){
+  var raw=null;try{raw=localStorage.getItem('casita.save2.slot'+n);}catch(e){}
+  var data=null;try{data=raw?JSON.parse(raw):null;}catch(e){}
+  var mode='solo',gameName='Partida '+n;try{mode=localStorage.getItem('casita.slotMode.'+n)|| (n===2?'mp':'solo');gameName=localStorage.getItem('casita.slotName.'+n)||gameName;}catch(e){}
+  var card=document.createElement('div');card.className='save-card';
+  var info=document.createElement('div');info.innerHTML='<b></b><small></small>';info.firstChild.textContent=gameName;info.lastChild.textContent=(data?'Guardada · ':'Espacio vacío · ')+(mode==='mp'?'Multijugador':'Solo');
+  var actions=document.createElement('div');actions.style.cssText='display:flex;gap:6px;align-items:center;flex-shrink:0';
+  var btn=document.createElement('button');btn.className='pri';btn.textContent=data?'Cargar':'Crear';
+  btn.onclick=(function(slot,exists){return function(){try{ACTIVE_SLOT=slot;SK='casita.save2.slot'+slot;localStorage.setItem('casita.activeSlot',String(slot));if(!exists){mview='new';$('mname').value=myName;$('saveName').value='';paintMenu();}else{localStorage.setItem('casita.loadOnStart','1');location.reload();}}catch(e){}};})(n,!!data);
+  actions.appendChild(btn);
+  if(data){var del=document.createElement('button');del.className='sec';del.textContent='🗑 Borrar';del.style.cssText='width:auto;margin:0;padding:8px 10px';del.onclick=(function(slot){return function(){if(!confirm('¿Borrar definitivamente la Partida '+slot+'?'))return;try{localStorage.removeItem('casita.save2.slot'+slot);localStorage.removeItem('casita.slotMode.'+slot);localStorage.removeItem('casita.slotName.'+slot);if(ACTIVE_SLOT===slot){ACTIVE_SLOT=1;localStorage.setItem('casita.activeSlot','1');}}catch(e){}renderSavedCards();};})(n);actions.appendChild(del);}
+  card.appendChild(info);card.appendChild(actions);host.appendChild(card);
+ }
+}
+function slotRender(){}
 var CLO=[['head','gorra','🧢','Gorra',250],['head','somb','👒','Sombrero de paja',400],['head','gorro','🧶','Gorro con pompón',350],['head','coro','👑','Corona',3000],
  ['face','gafas','🕶️','Gafas',300],['face','bigo','🥸','Bigote',150],
  ['body','abri','🧥','Abrigo largo',1200],['body','pelo','❄️','Abrigo de pelo',2200],['body','capa','🦸','Capa roja',1800],['body','bufa','🧣','Bufanda',350],
@@ -2622,33 +2675,40 @@ setInterval(function(){
 },50);
 // ----- guardado automático y botón de empezar de nuevo -----
 function saveGame(){if(RESET)return;try{
- var bm=money,bo=owned,bc=CL,bp=PET;
+ var bm=money,bo=owned,bc=CL,bp=PET,prev=null;try{prev=JSON.parse(localStorage.getItem(SK)||'null');}catch(e){}
  if(IS_ADMIN&&ADMIN_BACKUP){bm=ADMIN_BACKUP.money;bo=ADMIN_BACKUP.owned;bc={own:adminClone(ADMIN_BACKUP.clOwn),eq:adminClone(CL.eq)};bp=adminClone(PET);bp.own=adminClone(ADMIN_BACKUP.petOwn);bp.act=ADMIN_BACKUP.petAct;}
- localStorage.setItem(SK,JSON.stringify({v:1,money:bm,needs:needs,job:job,WK:WK,owned:bo,vi:(HWPREV!==null?HWPREV:vi),myCol:myCol,PROV:PROV,HOUSES:HOUSES,STAY:STAY,FAC:FAC,CL:bc,FARMS:FARMS,LOOK:LOOK,muted:muted,PET:bp,REST:REST,GYM:GYM,JAIL:JAIL,TAG:TAG,REC:REC}));
+ // Conserva la última posición exterior conocida incluso si el jugador está dentro de un edificio.
+ var savedPos=(cur===CITY&&sim)?{x:sim.position.x,y:sim.position.y,z:sim.position.z,rot:sim.rotation.y}:((prev&&prev.playerPos)||null);
+ localStorage.setItem(SK,JSON.stringify({v:1,money:bm,needs:needs,job:job,WK:WK,owned:bo,vi:(HWPREV!==null?HWPREV:vi),myCol:myCol,PROV:PROV,HOUSES:HOUSES,STAY:STAY,FAC:FAC,CL:bc,FARMS:FARMS,LOOK:LOOK,muted:muted,PET:bp,REST:REST,GYM:GYM,JAIL:JAIL,TAG:TAG,REC:REC,playerPos:savedPos,gameMinutes:gm}));
+ if(menu&&menu.hidden){var si=$('saveIndicator');if(!si){si=document.createElement('div');si.id='saveIndicator';si.textContent='💾';si.style.cssText='position:absolute;right:2px;top:-19px;z-index:99999;padding:0;background:transparent;border:0;color:white;font:14px sans-serif;line-height:16px;opacity:0;transition:opacity .2s;pointer-events:none';var nh=$('needsHud');(nh||document.body).appendChild(si);}si.textContent='💾';si.style.opacity='1';clearTimeout(window._saveIndTimer);window._saveIndTimer=setTimeout(function(){si.style.opacity='0';},1100);}
  }catch(e){}}
 setInterval(saveGame,3000);window.addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',function(){if(document.hidden)saveGame();});
 (function(){
   var s=null;try{s=JSON.parse(localStorage.getItem(SK)||'null');}catch(e){}
-  if(!s||s.v!==1){PROV=pickDifferentProvince(-1);endAct();inB=null;enterWorld(PROV);CITY.g.traverse(function(o){if(o.isMesh){o.receiveShadow=true;if(o.geometry.type!=='PlaneGeometry')o.castShadow=true;}});placeSim(CITY,HB.front[0]+1,HB.front[1]);return;}
+  if(!s||s.v!==1){PROV=pickDifferentProvince(-1);endAct();inB=null;enterWorld(PROV);CITY.g.traverse(function(o){if(o.isMesh){o.receiveShadow=true;if(o.geometry.type!=='PlaneGeometry')o.castShadow=true;}});placeSim(CITY,HB.front[0]+1,HB.front[1]);
+    try{if(localStorage.getItem('casita.pendingNew')==='1'){var pl=JSON.parse(localStorage.getItem('casita.pendingLook')||'null'),mp=localStorage.getItem('casita.pendingMP')==='1';if(pl){LOOK=pl;myCol=LOOK.shirt;['pants','hair','shoes'].forEach(function(k){setLook(k,LOOK[k]);});setLook('shirt',myCol);applyStyle();}localStorage.removeItem('casita.pendingNew');localStorage.removeItem('casita.pendingLook');localStorage.removeItem('casita.pendingMP');saveGame();if(mp){started=false;menu.hidden=false;mview='mp';paintMenu();}else{started=true;menu.hidden=true;}}}catch(e){}
+    return;}
   if(typeof s.money==='number')money=s.money;
   if(s.needs)Object.keys(needs).forEach(function(k){if(typeof s.needs[k]==='number')needs[k]=s.needs[k];});
   job=s.job||job;WK=s.WK||{};if(s.owned)owned=s.owned;HOUSES=s.HOUSES||{};STAY=s.STAY||null;FAC=s.FAC||null;FARMS=s.FARMS||{};CL=s.CL||{own:{},eq:{}};if(s.PET)PET=s.PET;REST=s.REST||null;if(s.GYM)GYM=s.GYM;
   if(typeof s.vi==='number'&&owned[s.vi]){vi=s.vi;setVehOn(sim,vi);}
   if(s.myCol)myCol=s.myCol;if(s.LOOK){['pants','hair','shoes','skin'].forEach(function(k){if(s.LOOK[k])setLook(k,s.LOOK[k]);});LOOK.hs=s.LOOK.hs|0;LOOK.sz=s.LOOK.sz||1;applyStyle();}setLook('shirt',myCol);
-  muted=!!s.muted;bs.textContent=muted?'🔇':'🔊';if(master)master.gain.value=muted?0:.8;
+  muted=!!s.muted;if(master)master.gain.value=muted?0:.8;
   simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+myName+(IS_ADMIN?' [ADM]':'');
   Object.keys(SLOTN).forEach(function(sl){if(CL.eq[sl])setAcc(sl,CL.eq[sl]);});
   if(+s.PROV>=0&&+s.PROV<PV.length)PROV=+s.PROV;
   endAct();inB=null;enterWorld(PROV);
   CITY.g.traverse(function(o){if(o.isMesh){o.receiveShadow=true;if(o.geometry.type!=='PlaneGeometry')o.castShadow=true;}});
   placeSim(CITY,HB.front[0]+1,HB.front[1]);
+  if(s.playerPos&&Number.isFinite(s.playerPos.x)&&Number.isFinite(s.playerPos.z)){sim.position.set(s.playerPos.x,Number.isFinite(s.playerPos.y)?s.playerPos.y:baseY(),s.playerPos.z);if(Number.isFinite(s.playerPos.rot))sim.rotation.y=s.playerPos.rot;}
+  if(typeof s.gameMinutes==='number'&&Number.isFinite(s.gameMinutes))gm=s.gameMinutes;
   TAG=s.TAG||0;if(s.REC)REC=s.REC;JAIL=s.JAIL||null;if(JAIL){if(JAIL.until>Date.now())jailIn();else JAIL=null;}
-  $('msolo').textContent='▶ Continuar partida';
   // Tras reiniciar, el modo administrador queda apagado: el guardado conserva el estado previo.
   IS_ADMIN=false;ADMIN_BACKUP=null;try{localStorage.removeItem(SK+'.admBackup');}catch(e){}
   paintAdminName();
 })();
-$('mreset').onclick=function(){
+try{if(localStorage.getItem('casita.loadOnStart')==='1'){localStorage.removeItem('casita.loadOnStart');started=true;menu.hidden=true;}}catch(e){}
+if($('mreset'))$('mreset').onclick=function(){
   if(!window.confirm('¿Empezar una partida nueva? Se borrará todo tu progreso.'))return;
   RESET=true;
   try{localStorage.removeItem(SK);localStorage.removeItem('casita.n');}catch(e){}
@@ -2667,8 +2727,7 @@ $('mreset').onclick=function(){
     if(typeof CT!=='undefined')CT.forEach(function(c){if(c.loaded)unloadCity(c.i);});
     PROV=pickDifferentProvince(PROV);enterWorld(PROV);
     simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+myName+(IS_ADMIN?' [ADM]':'');
-    $('msolo').textContent='▶ Continuar partida';
-    if(typeof updateHUD==='function')updateHUD();
+      if(typeof updateHUD==='function')updateHUD();
     RESET=false;saveGame();toast('✨ Nueva partida en '+PV[PROV].n);
   }catch(err){RESET=false;console.error('No se pudo reiniciar la partida:',err);toast('No se pudo reiniciar. Inténtalo otra vez.');}
 };
