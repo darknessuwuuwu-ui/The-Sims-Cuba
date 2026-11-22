@@ -33,6 +33,10 @@ button{font-family:inherit}button:focus-visible{outline:2px solid #fff;outline-o
 #stage{position:relative;flex:1;min-height:0;height:100%;overflow:hidden;background:#cfe9f5}
 #stage canvas{position:absolute;inset:0;display:block;touch-action:none;cursor:grab}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+/* Dinero visible encima de los controles inferiores */
+#moneyHud{position:absolute;left:max(10px,env(safe-area-inset-left,0px));bottom:62px;z-index:8;padding:6px 10px;border-radius:11px;background:rgba(13,22,51,.92);border:1px solid rgba(112,139,225,.5);font-weight:800;font-size:14px;box-shadow:0 2px 8px #0005;pointer-events:none;white-space:nowrap}
+#moneyHud small{color:#aebcf0;font-weight:600;margin-left:3px}
+@media(max-width:600px){#moneyHud{bottom:60px;font-size:13px;padding:5px 8px}}
 /* Barras compactas del personaje, en la esquina inferior derecha del mapa */
 #needsHud{position:absolute;right:12px;bottom:14px;z-index:6;width:clamp(112px,19vw,164px);padding:8px 9px;background:rgba(13,22,51,.9);border:1px solid rgba(112,139,225,.48);border-radius:13px;box-shadow:0 3px 12px #0005;pointer-events:none;display:grid;gap:6px;backdrop-filter:blur(5px)}
 .nhrow{display:grid;grid-template-columns:17px 1fr;align-items:center;gap:6px;min-width:0}
@@ -183,6 +187,7 @@ body.pvw #top,body.pvw #bph2,body.pvw #bmn,body.pvw #bctr,body.pvw #toast,body.p
 </div>
 <div id="stage">
   <div id="labels"></div>
+  <div id="moneyHud">💰 <span id="moneyAmount">2.000</span><small>CUP</small></div>
   <div id="needsHud" aria-label="Estado del personaje">
     <div class="nhrow"><span class="nhico">⚡</span><div class="nhbar"><i id="nhEnergy" style="background:#2fc46b"></i></div></div>
     <div class="nhrow"><span class="nhico">🍴</span><div class="nhbar"><i id="nhHunger" style="background:#f59e0b"></i></div></div>
@@ -1185,7 +1190,7 @@ function frame(now){
   if(sig!==lastCard){lastCard=sig;card.hidden=!showCard;$('ct').textContent=ctxt;go.textContent=btxt;go.disabled=dis;$('go2').hidden=!b2;$('go2').textContent=b2;}
   // hud
   STATS.forEach(function(s){var v=Math.round(needs[s[0]]),r=sref[s[0]];if(v!==r.last){r.last=v;r.v.textContent=v+'/100';r.i.style.width=v+'%';var mini=$('nh'+s[0][0].toUpperCase()+s[0].slice(1));if(mini)mini.style.width=v+'%';}});
-  $('cash').textContent=fmt(money);$('sub').textContent=PV[PROV].c+' · '+job+(JAIL?' · 🔒 '+Math.max(0,Math.ceil((JAIL.until-Date.now())/1000))+' s':'');
+  $('cash').textContent=fmt(money);if($('moneyAmount'))$('moneyAmount').textContent=fmt(money);$('sub').textContent=PV[PROV].c+' · '+job+(JAIL?' · 🔒 '+Math.max(0,Math.ceil((JAIL.until-Date.now())/1000))+' s':'');
   $('state').textContent=act?act.k.l:pathQ.length?'En camino':'Con normalidad';
   var mi=Math.floor(gm);
   if(mi!==lastMin){
@@ -2450,11 +2455,29 @@ setInterval(saveGame,3000);window.addEventListener('pagehide',saveGame);document
   TAG=s.TAG||0;if(s.REC)REC=s.REC;JAIL=s.JAIL||null;if(JAIL){if(JAIL.until>Date.now())jailIn();else JAIL=null;}
   $('msolo').textContent='▶ Continuar partida';
 })();
-var rsT=0;
 $('mreset').onclick=function(){
-  var b=$('mreset');
-  if(!rsT){b.textContent='⚠️ ¿Seguro? Toca otra vez';rsT=setTimeout(function(){rsT=0;b.textContent='🗑 Empezar de nuevo';},4000);return;}
-  RESET=true;try{localStorage.removeItem(SK);}catch(e){}try{location.reload();}catch(e){}
+  if(!window.confirm('¿Empezar una partida nueva? Se borrará todo tu progreso.'))return;
+  RESET=true;
+  try{localStorage.removeItem(SK);localStorage.removeItem('casita.n');}catch(e){}
+  // Reinicio dentro de la partida actual: no recarga ni cambia de página.
+  try{
+    if(LOVE&&LOVE.partner&&LOVE.partner.parent)LOVE.partner.parent.remove(LOVE.partner);
+    if(typeof partnerDetach==='function')partnerDetach();
+    if(typeof endAct==='function')endAct();
+    if(typeof closeSheet==='function')closeSheet();
+    money=2000;needs={energy:72,hunger:90,mood:80,health:100};job='Sin empleo';WK={};
+    owned=[1,0,0,0];vi=0;setVehOn(sim,0);HOUSES={};STAY=null;FAC=null;FARMS={};
+    CL={own:{},eq:{}};PET={own:{},act:-1,mode:'follow',name:''};REST=null;GYM={str:0,last:''};JAIL=null;TAG=0;REC={n:0};
+    LOOK={shirt:0x2f5bea,pants:0x2d3e6b,hair:0x3a2a1e,shoes:0x2a2220,skin:0,hs:0,sz:1};
+    myCol=0x2f5bea;setLook('pants',LOOK.pants);setLook('hair',LOOK.hair);setLook('shoes',LOOK.shoes);setLook('shirt',myCol);applyStyle();
+    LOVE={target:null,score:0,married:false,childAt:0,belly:null};
+    if(typeof CT!=='undefined')CT.forEach(function(c){if(c.loaded)unloadCity(c.i);});
+    PROV=9;enterWorld(PROV);
+    simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+myName;
+    $('msolo').textContent='▶ Continuar partida';
+    if(typeof updateHUD==='function')updateHUD();
+    saveGame();RESET=false;toast('✨ Partida nueva iniciada');
+  }catch(err){RESET=false;console.error('No se pudo reiniciar la partida:',err);toast('No se pudo reiniciar. Inténtalo otra vez.');}
 };
 
 })();
