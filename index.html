@@ -283,6 +283,7 @@ var PV=[['Pinar del Río','Pinar del Río',0,0x6f9a4a,4,0,0x3f7a4a,.55,0xbfdcc8,
 ['Santiago de Cuba','Santiago de Cuba',13,0x8a9a5a,6,'S',0x56784a,.6,0,'Parque Céspedes','Bar Casa de la Trova','Música, calor y montañas'],
 ['Guantánamo','Guantánamo',14,0xb0a864,1,'S',0x6e8450,.5,0xd8d0b0,'Parque Martí','Bar El Guaso','Tierra árida y cuchillas'],
 ['Isla de la Juventud','Nueva Gerona',-1.5,0xc8c58a,2,'E',0x7f9a60,.15,0xc8eef2,'Parque Reyes Magos','Bar Los Pinos','Isla de pinos y arenas claras']].map(function(r,i){return{n:r[0],c:r[1],x:r[2],g:r[3],pl:PAL[r[4]],s:r[5],hc:r[6],hs:r[7],sk:r[8],pk:r[9],br:r[10],t:r[11],i:i};});
+function pickDifferentProvince(exclude){var choices=PV.map(function(p){return p.i;}).filter(function(i){return i!==exclude;});return choices[Math.floor(Math.random()*choices.length)];}
 var L0=L,D0={};L0[0][1]='mp1';L0[3][0]='mp2';L0[4][3]='mp3';L0[3][6]='fac';L0[0][6]='rop';L0[2][1]='res';L0[4][6]='orr';L0[2][4]='jai';L0[4][0]='org';L0[3][2]='pol';L0[1][0]='gym';Object.keys(D).forEach(function(k){D0[k]=D[k].n;});
 function mkL(i){var q=i*7919+13,R=function(){q=(q*16807)%2147483647;return q/2147483647;};
   var a=['cas','mer','con','hos','ban','ofi','tal','tac','caf','cin','bar','pz','par','par','par','par','mp1','mp2','mp3','fac','rop','res','org','org','orr','gym','jai','pol'];while(a.length<35)a.push('cas');
@@ -2449,7 +2450,7 @@ function saveGame(){if(RESET)return;try{localStorage.setItem(SK,JSON.stringify({
 setInterval(saveGame,3000);window.addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',function(){if(document.hidden)saveGame();});
 (function(){
   var s=null;try{s=JSON.parse(localStorage.getItem(SK)||'null');}catch(e){}
-  if(!s||s.v!==1){PROV=Math.floor(Math.random()*PV.length);endAct();inB=null;enterWorld(PROV);CITY.g.traverse(function(o){if(o.isMesh){o.receiveShadow=true;if(o.geometry.type!=='PlaneGeometry')o.castShadow=true;}});placeSim(CITY,HB.front[0]+1,HB.front[1]);return;}
+  if(!s||s.v!==1){PROV=pickDifferentProvince(-1);endAct();inB=null;enterWorld(PROV);CITY.g.traverse(function(o){if(o.isMesh){o.receiveShadow=true;if(o.geometry.type!=='PlaneGeometry')o.castShadow=true;}});placeSim(CITY,HB.front[0]+1,HB.front[1]);return;}
   if(typeof s.money==='number')money=s.money;
   if(s.needs)Object.keys(needs).forEach(function(k){if(typeof s.needs[k]==='number')needs[k]=s.needs[k];});
   job=s.job||job;WK=s.WK||{};if(s.owned)owned=s.owned;HOUSES=s.HOUSES||{};STAY=s.STAY||null;FAC=s.FAC||null;FARMS=s.FARMS||{};CL=s.CL||{own:{},eq:{}};if(s.PET)PET=s.PET;REST=s.REST||null;if(s.GYM)GYM=s.GYM;
@@ -2482,11 +2483,11 @@ $('mreset').onclick=function(){
     myCol=0x2f5bea;setLook('pants',LOOK.pants);setLook('hair',LOOK.hair);setLook('shoes',LOOK.shoes);setLook('shirt',myCol);applyStyle();
     LOVE={target:null,score:0,married:false,childAt:0,belly:null};
     if(typeof CT!=='undefined')CT.forEach(function(c){if(c.loaded)unloadCity(c.i);});
-    PROV=9;enterWorld(PROV);
+    PROV=pickDifferentProvince(PROV);enterWorld(PROV);
     simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+myName;
     $('msolo').textContent='▶ Continuar partida';
     if(typeof updateHUD==='function')updateHUD();
-    saveGame();RESET=false;toast('✨ Partida nueva iniciada');
+    RESET=false;saveGame();toast('✨ Nueva partida en '+PV[PROV].n);
   }catch(err){RESET=false;console.error('No se pudo reiniciar la partida:',err);toast('No se pudo reiniciar. Inténtalo otra vez.');}
 };
 
