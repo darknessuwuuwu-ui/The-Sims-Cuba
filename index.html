@@ -45,6 +45,7 @@ button{font-family:inherit}button:focus-visible{outline:2px solid #fff;outline-o
 .nhbar i{display:block;height:100%;width:100%;border-radius:8px;transition:width .25s}
 @media(max-width:600px){#needsHud{right:8px;bottom:66px;width:104px;padding:7px;gap:5px}.nhbar{height:6px}}
 #fpsCounter{position:absolute;top:10px;left:10px;z-index:12;padding:4px 7px;border-radius:7px;background:rgba(0,0,0,.68);border:1px solid rgba(255,255,255,.2);color:#fff;font:700 11px/1.2 monospace;pointer-events:none;font-variant-numeric:tabular-nums}
+#gameTimeHud{position:absolute;top:39px;left:10px;z-index:12;padding:4px 7px;border-radius:7px;background:rgba(0,0,0,.68);border:1px solid rgba(255,255,255,.2);color:#fff;font:700 12px/1.2 monospace;pointer-events:none;font-variant-numeric:tabular-nums}
 #eventTimers{position:absolute;right:12px;bottom:116px;z-index:7;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none}
 #eventTimers:empty{display:none}
 .event-timer{padding:4px 8px;border-radius:8px;background:rgba(13,22,51,.94);border:1px solid rgba(255,255,255,.35);color:#fff;font-size:11px;font-weight:800;box-shadow:0 2px 7px #0006;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -174,7 +175,7 @@ body.pvw #top,body.pvw #bph2,body.pvw #bmn,body.pvw #bctr,body.pvw #toast,body.p
       <small>Escribe el código de 4 letras del anfitrión.</small>
     </div></div>
     <div id="mpof" hidden>
-      <small>Sin internet: ejecuta servidor-1.py en una PC (o Termux) y abre esta página desde esa dirección en todos los celulares, misma WiFi o hotspot.</small>
+      <small>Sin internet: ejecuta server.py en Termux o PC. Todos deben abrir la dirección del servidor usando la misma Wi-Fi o hotspot.</small>
       <input id="ofip" placeholder="IP del servidor (ej. 192.168.1.5)" hidden>
       <button class="pri" id="ofhost">＋ Crear sala offline</button><button id="ofjoin">Unirme a sala offline</button>
       <small id="ofs"></small>
@@ -210,6 +211,7 @@ body.pvw #top,body.pvw #bph2,body.pvw #bmn,body.pvw #bctr,body.pvw #toast,body.p
 <div id="stage">
   <div id="labels"></div>
   <div id="fpsCounter" aria-label="Fotogramas por segundo">FPS: --</div>
+  <div id="gameTimeHud" aria-label="Hora del juego">08:00</div>
   <div id="moneyHud">💰 <span id="moneyAmount">2.000</span><small>CUP</small></div>
   <div id="eventTimers" aria-live="polite"></div>
   <div id="needsHud" aria-label="Estado del personaje">
@@ -1046,9 +1048,9 @@ STATS.forEach(function(s){
 });
 var toastT=0;
 function toast(t){sfx('pop');var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('on');},2200);}
-var t0=Date.now(),gm0=(new Date()).getHours()*60+(new Date()).getMinutes(),gm=gm0,lastMin=-1;
+var gm=480,lastMin=-1; // Reloj propio: empieza a las 08:00, sin depender del reloj del teléfono.
 var DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],MN=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-var EV=[['🛒','Llegó mercancía'],['🚌','Guagua en la terminal'],['🎶','Música en la plaza'],['⛽','Llegó combustible'],['🌴','Día de sol en el parque']],evI=0,evEnd=gm0+13;
+var EV=[['🛒','Llegó mercancía'],['🚌','Guagua en la terminal'],['🎶','Música en la plaza'],['⛽','Llegó combustible'],['🌴','Día de sol en el parque']],evI=0,evEnd=gm+13;
 
 // ---------- movement ----------
 function blockedAt(w,x,z){return x<0||z<0||x>=w.w||z>=w.h||w.map[z][x]!=='.'||(w===CITY&&HW&&HW[z*w.w+x]===1&&!owned[3]&&!FORCEHW&&!(UBER&&UBER.ph==='ride'));}
@@ -1182,7 +1184,7 @@ var fpsFrames=0,fpsLast=0,fpsValue=0,lastCityPower=null,lastBlackoutState=null;
 function frame(now){
   fpsFrames++;if(!fpsLast)fpsLast=now;var fpsElapsed=now-fpsLast;if(fpsElapsed>=500){fpsValue=Math.round(fpsFrames*1000/fpsElapsed);fpsFrames=0;fpsLast=now;var fe=$('fpsCounter');if(fe)fe.textContent='FPS: '+fpsValue;}
   var dt=Math.min((now-last)/1000,.1);last=now;
-  gm=Date.now()/60000-new Date().getTimezoneOffset();
+  gm+=(act&&act.k.sleep?14.4:1.2)*dt; // 24 horas del juego = 20 minutos reales; dormir acelera el reloj 12 veces.
   STATS.forEach(function(s){needs[s[0]]=clamp(needs[s[0]]-s[3]*dt*.1*(s[0]==='energy'?1-Math.min(.6,GYM.str*.03):1),0,100);});
   if(needs.hunger<15)needs.health=clamp(needs.health-.2*dt,0,100);
   var by=baseY();
@@ -1271,11 +1273,12 @@ function frame(now){
   STATS.forEach(function(s){var v=Math.round(needs[s[0]]),r=sref[s[0]];if(v!==r.last){r.last=v;r.v.textContent=v+'/100';r.i.style.width=v+'%';var mini=$('nh'+s[0][0].toUpperCase()+s[0].slice(1));if(mini)mini.style.width=v+'%';}});
   $('cash').textContent=fmt(money);if($('moneyAmount'))$('moneyAmount').textContent=fmt(money);$('sub').textContent=PV[PROV].c+' · '+job+(JAIL?' · 🔒 '+Math.max(0,Math.ceil((JAIL.until-Date.now())/1000))+' s':'');
   $('state').textContent=act?act.k.l:pathQ.length?'En camino':'Con normalidad';
-  var mi=Math.floor(gm);
+  var mi=Math.floor(gm)%60;
   if(mi!==lastMin){
-    lastMin=mi;var hh=Math.floor(hour),mm=mi%60,dd2=new Date();
-    $('tm').textContent=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
-    $('dt').textContent=DN[dd2.getDay()]+', '+dd2.getDate()+' '+MN[dd2.getMonth()];
+    lastMin=Math.floor(gm);var hh=Math.floor(gm/60)%24,mm=mi,dayNo=Math.floor(gm/1440)+1;
+    var gameClockText=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+    $('tm').textContent=gameClockText;var gh=$('gameTimeHud');if(gh)gh.textContent='🕒 '+gameClockText;
+    $('dt').textContent='Día '+dayNo;
     $('wi').textContent=dl>.45?'☀️':'🌙';$('tc').textContent=Math.round(24+5*dl)+' °C';
     if(gm>=evEnd){evI=(evI+1)%EV.length;evEnd=gm+rnd(8,20);}
     $('tick').textContent=EV[evI][0]+' '+EV[evI][1]+' · '+Math.max(1,Math.ceil(evEnd-gm))+' min';
@@ -1406,7 +1409,7 @@ function joinRoom(code){
     });
   },function(){NET.busy='No se pudo cargar el servicio de salas. Revisa tu conexión.';paintMenu();});
 }
-// ---------- multijugador OFFLINE (servidor LAN servidor-1.py, sin internet) ----------
+// ---------- multijugador OFFLINE (servidor LAN server.py, sin internet) ----------
 var OFT=[],OFH={},OFQ=[],OFB='';
 function mpTab(t){$('mpon').hidden=t!=='on';$('mpof').hidden=t!=='of';$('tabon').classList.toggle('act',t==='on');$('tabof').classList.toggle('act',t==='of');}
 $('tabon').onclick=function(){mpTab('on');};$('tabof').onclick=function(){mpTab('of');};
@@ -1427,7 +1430,7 @@ $('ofhost').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe l
       else if(e.k==='close'){var h3=OFH[e.cid];delete OFH[e.cid];if(h3&&h3.close)h3.close();}
     });}).catch(function(){}).then(done);},90);
     ofLoop(function(done){if(OFQ.length){var b=OFQ;OFQ=[];ofPost('/r/h',{b:b}).catch(function(){}).then(done);}else done();},100);
-  }).catch(function(){ofst('No se encontró el servidor. ¿Está corriendo servidor-1.py?');});};
+  }).catch(function(){ofst('No se encontró el servidor. ¿Está corriendo server.py?');});};
 $('ofjoin').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe la IP del servidor.');saveName();ofst('Conectando…');
   ofPost('/r/join',{name:myName}).then(function(r){if(!r.cid){ofst('No hay una sala abierta o está llena.');return;}
     var cid=r.cid,c={peer:'H',open:true,send:function(d){OFQ.push(d);},on:function(){}};
@@ -1435,7 +1438,7 @@ $('ofjoin').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe l
     netUp('OFFLINE',false);menu.hidden=true;toast('Entraste a la sala offline');
     ofLoop(function(done){ofGet('/r/poll?c='+cid).then(function(x){(x.ev||[]).forEach(function(e){if(e.close){if(NET.on)leave('La sala se cerró');}else if(e.m)onData(e.m);});}).catch(function(){}).then(done);},90);
     ofLoop(function(done){var q=OFQ;OFQ=[];q.forEach(function(m){ofPost('/r/g',{cid:cid,m:m}).catch(function(){});});done();},120);
-  }).catch(function(){ofst('No se encontró el servidor. ¿Misma WiFi y servidor-1.py abierto?');});};
+  }).catch(function(){ofst('No se encontró el servidor. ¿Misma WiFi y server.py abierto?');});};
 $('msolo').onclick=function(){started=true;saveName();menu.hidden=true;};$('mcont2').onclick=function(){saveName();menu.hidden=true;};['bph','bch','bho','bea'].forEach(function(i){$(i).addEventListener('click',function(){menu.hidden=true;});});
 $('mhost').onclick=createRoom;
 $('mjoin').onclick=function(){joinRoom($('mjc').value);};
@@ -1445,7 +1448,10 @@ $('bctr').onclick=function(){free=false;};$('bmn').onclick=function(){closeSheet
 function adminClone(o){return JSON.parse(JSON.stringify(o||{}));}
 function paintAdminName(){simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+myName+(IS_ADMIN?' [ADM]':'');if(simLab.el)simLab.el.style.color=IS_ADMIN?'#ffd34d':'';}
 function enableAdmin(){
- if(!IS_ADMIN){ADMIN_BACKUP={money:money,owned:owned.slice(),clOwn:adminClone(CL.own),petOwn:adminClone(PET.own),petAct:PET.act};}
+ if(!IS_ADMIN){
+  ADMIN_BACKUP={money:money,owned:owned.slice(),clOwn:adminClone(CL.own),petOwn:adminClone(PET.own),petAct:PET.act};
+  try{localStorage.setItem(SK+'.admBackup',JSON.stringify(ADMIN_BACKUP));}catch(e){}
+ }
  IS_ADMIN=true;if(JAIL)release();money=1e12;owned=owned.map(function(){return 1;});
  CLO.forEach(function(c){CL.own[c[1]]=1;});
  PETS.forEach(function(p,i){PET.own[i]=1;});
@@ -1455,7 +1461,7 @@ function enableAdmin(){
 function disableAdmin(){
  if(!IS_ADMIN)return;
  if(ADMIN_BACKUP){money=ADMIN_BACKUP.money;owned=ADMIN_BACKUP.owned.slice();CL.own=adminClone(ADMIN_BACKUP.clOwn);PET.own=adminClone(ADMIN_BACKUP.petOwn);PET.act=ADMIN_BACKUP.petAct;}
- ADMIN_BACKUP=null;IS_ADMIN=false;paintAdminName();toast('Modo administrador desactivado · progreso restaurado');
+ ADMIN_BACKUP=null;IS_ADMIN=false;try{localStorage.removeItem(SK+'.admBackup');}catch(e){}paintAdminName();toast('Modo administrador desactivado · progreso restaurado');
 }
 function runCmd(v){var m=/^\/\$\s*([\d.,]+)\s*$/.exec(v),r;
  if(v.toLowerCase()==='/adm'){enableAdmin();r='👑 Modo administrador activado';}
@@ -2615,7 +2621,11 @@ setInterval(function(){
   else if(A.st===3){if(stepV(A.pc,dt,6.5)&&(A.fd||!A.fr.parent)){toast('✅ La policía reparó el desastre');accEnd();}}
 },50);
 // ----- guardado automático y botón de empezar de nuevo -----
-function saveGame(){if(RESET)return;try{localStorage.setItem(SK,JSON.stringify({v:1,money:money,needs:needs,job:job,WK:WK,owned:owned,vi:(HWPREV!==null?HWPREV:vi),myCol:myCol,PROV:PROV,HOUSES:HOUSES,STAY:STAY,FAC:FAC,CL:CL,FARMS:FARMS,LOOK:LOOK,muted:muted,PET:PET,REST:REST,GYM:GYM,JAIL:JAIL,TAG:TAG,REC:REC}));}catch(e){}}
+function saveGame(){if(RESET)return;try{
+ var bm=money,bo=owned,bc=CL,bp=PET;
+ if(IS_ADMIN&&ADMIN_BACKUP){bm=ADMIN_BACKUP.money;bo=ADMIN_BACKUP.owned;bc={own:adminClone(ADMIN_BACKUP.clOwn),eq:adminClone(CL.eq)};bp=adminClone(PET);bp.own=adminClone(ADMIN_BACKUP.petOwn);bp.act=ADMIN_BACKUP.petAct;}
+ localStorage.setItem(SK,JSON.stringify({v:1,money:bm,needs:needs,job:job,WK:WK,owned:bo,vi:(HWPREV!==null?HWPREV:vi),myCol:myCol,PROV:PROV,HOUSES:HOUSES,STAY:STAY,FAC:FAC,CL:bc,FARMS:FARMS,LOOK:LOOK,muted:muted,PET:bp,REST:REST,GYM:GYM,JAIL:JAIL,TAG:TAG,REC:REC}));
+ }catch(e){}}
 setInterval(saveGame,3000);window.addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',function(){if(document.hidden)saveGame();});
 (function(){
   var s=null;try{s=JSON.parse(localStorage.getItem(SK)||'null');}catch(e){}
@@ -2634,6 +2644,9 @@ setInterval(saveGame,3000);window.addEventListener('pagehide',saveGame);document
   placeSim(CITY,HB.front[0]+1,HB.front[1]);
   TAG=s.TAG||0;if(s.REC)REC=s.REC;JAIL=s.JAIL||null;if(JAIL){if(JAIL.until>Date.now())jailIn();else JAIL=null;}
   $('msolo').textContent='▶ Continuar partida';
+  // Tras reiniciar, el modo administrador queda apagado: el guardado conserva el estado previo.
+  IS_ADMIN=false;ADMIN_BACKUP=null;try{localStorage.removeItem(SK+'.admBackup');}catch(e){}
+  paintAdminName();
 })();
 $('mreset').onclick=function(){
   if(!window.confirm('¿Empezar una partida nueva? Se borrará todo tu progreso.'))return;
