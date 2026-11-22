@@ -832,13 +832,14 @@ $('mch').addEventListener('click',function(e){var b=e.target.closest('button');i
   buildCh();});
 function showMenu(){menu.hidden=false;mview='main';paintMenu();}
 function saveName(){var v=$('mname').value.trim().slice(0,14)||'Cubita';myName=v;simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+v;try{localStorage.setItem('casita.n',v);}catch(e){}}
+var PCFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]}};
 function loadPeer(){
   if(window.Peer)return Promise.resolve();
   var S=['https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];
   return new Promise(function(ok,no){var i=0;(function t(){if(i>=S.length)return no();var s=document.createElement('script');s.src=S[i++];s.onload=function(){window.Peer?ok():t();};s.onerror=function(){s.remove();t();};document.head.appendChild(s);})();});
 }
 function send(d,except){
-  d.f=NET.id;
+  if(!d.f)d.f=NET.id;
   Object.keys(NET.conns).forEach(function(k){var c=NET.conns[k];if(k!==except&&c.open)try{c.send(d);}catch(e){}});
 }
 function mkRemote(id,d){
@@ -849,7 +850,7 @@ function mkRemote(id,d){
 function dropRemote(id){var r=RM[id];if(!r)return;scene.remove(r.g);r.l.el.remove();var i=LABS.indexOf(r.l);if(i>=0)LABS.splice(i,1);delete RM[id];if(NET.on)toast('Un jugador salió');paintMenu();}
 function addChat(n,x){CHL.push([n,x]);if(CHL.length>40)CHL.shift();var lg=$('clog');if(lg&&!sheet.hidden){var m=document.createElement('div');m.className='msg';m.innerHTML='<b></b><br><span></span>';m.firstChild.textContent=n;m.lastChild.textContent=x;lg.appendChild(m);lg.scrollTop=1e6;}else toast(n+': '+x);}
 function onData(d,from){
-  if(d.t==='p'){if(!RM[d.f])mkRemote(d.f,d);var r=RM[d.f];if(r.l.el.textContent!==d.n)r.l.el.textContent=d.n;r.x=d.x;r.z=d.z;r.r=d.r;r.city=!!d.m;r.wk=!!d.w;r.pv=d.v;r.vh=d.h|0;paintMenu();}
+  if(d.t==='p'){if(!RM[d.f]){mkRemote(d.f,d);paintMenu();}var r=RM[d.f];if(r.l.el.textContent!==d.n)r.l.el.textContent=d.n;r.x=d.x;r.z=d.z;r.r=d.r;r.city=!!d.m;r.wk=!!d.w;r.pv=d.v;r.vh=d.h|0;}
   else if(d.t==='c')addChat(d.n,d.x);
   else if(d.t==='x')dropRemote(d.f);
 }
@@ -868,10 +869,10 @@ function createRoom(){
   loadPeer().then(function(){
     var tries=0;(function go(){
       var code='';for(var i=0;i<4;i++)code+=String.fromCharCode(65+Math.floor(Math.random()*26));
-      var p=new Peer('casita-'+code);
+      var p=new Peer('casita-'+code,PCFG);p.on('disconnected',function(){try{p.reconnect();}catch(e){}});
       p.on('open',function(id){NET.peer=p;NET.id='H';netUp(code,true);menu.hidden=true;toast('Sala '+code+' creada');});
       p.on('connection',function(c){c.on('open',function(){NET.conns[c.peer]=c;hostOn(c);toast('Entró un jugador');});});
-      p.on('error',function(er){if(er&&er.type==='unavailable-id'&&tries++<4){go();return;}if(!NET.on){NET.busy='No se pudo crear la sala. Revisa tu conexión.';paintMenu();}});
+      p.on('error',function(er){if(er&&er.type==='unavailable-id'&&tries++<4){go();return;}if(!NET.on){NET.busy='No se pudo crear la sala ('+(er&&er.type||'error')+'). Revisa tu conexión.';paintMenu();}});
     })();
   },function(){NET.busy='No se pudo cargar el servicio de salas. Revisa tu conexión.';paintMenu();});
 }
@@ -879,9 +880,9 @@ function joinRoom(code){
   code=(code||'').toUpperCase().replace(/[^A-Z]/g,'');if(code.length!==4){NET.busy='El código tiene 4 letras.';paintMenu();return;}
   saveName();NET.busy='Conectando…';paintMenu();
   loadPeer().then(function(){
-    var p=new Peer(),done=false,to=setTimeout(function(){fail('No se pudo conectar. Revisa el código.');},12000);
+    var p=new Peer(undefined,PCFG),done=false,to=setTimeout(function(){fail('Tiempo agotado. Revisa el código y tu conexión.');},25000);
     function fail(t){if(done)return;done=true;clearTimeout(to);try{p.destroy();}catch(e){}NET.busy=t;paintMenu();}
-    p.on('error',function(er){fail(er&&er.type==='peer-unavailable'?'No existe esa sala.':'No se pudo conectar.');});
+    p.on('error',function(er){fail(er&&er.type==='peer-unavailable'?'No existe esa sala.':'No se pudo conectar ('+(er&&er.type||'error')+').');});
     p.on('open',function(id){
       var c=p.connect('casita-'+code,{reliable:true});
       c.on('open',function(){if(done)return;done=true;clearTimeout(to);NET.peer=p;NET.id=id;NET.conns={H:c};netUp(code,false);menu.hidden=true;toast('Entraste a la sala '+code);});
