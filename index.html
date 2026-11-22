@@ -401,7 +401,7 @@ function mkL(i){var q=i*7919+13,R=function(){q=(q*16807)%2147483647;return q/214
   for(var k=a.length-1;k>0;k--){var j=Math.floor(R()*(k+1)),t=a[k];a[k]=a[j];a[j]=t;}
   var o=[];for(var r=0;r<5;r++)o.push(a.slice(r*7,r*7+7));var fx={};[['org',0,6],['orr',4,6],['org',4,0]].forEach(function(q){var f=null;for(var y=0;y<5;y++)for(var x=0;x<7;x++)if(!f&&o[y][x]===q[0]&&!fx[y+','+x])f=[y,x];if(f){var t=o[q[1]][q[2]];o[q[1]][q[2]]=q[0];o[f[0]][f[1]]=t;}fx[q[1]+','+q[2]]=1;});return o;}
 var HOUSES={},STAY=null,HN=['Casita humilde','Casa estándar','Casa con patio','Casa moderna'],HP=[8000,18000,32000,60000],HR=[150,330,600,1100],HACC=[0xe0554f,0x2fa86b,0x2f5bea,0x8b5cf6],HMIN={tv:1,shower:1,pc:2,radio:3},RMIN={tv:1,fridge:1,sofa:2,radio:2};
-var RN=[101,102,103,201],RT=[0,1,1,2],RP=[250,450,450,800],RTN=['Económica','Estándar','Estándar','Suite'],RD=['cama y ducha','+ tele y nevera','+ tele y nevera','+ sofá, música y más'],DAYMS=360000;
+var RN=[101,102,103,201],RT=[0,1,1,2],RP=[250,450,450,800],RTN=['Económica','Estándar','Estándar','Suite'],RD=['cama y ducha','+ tele y nevera','+ tele y nevera','+ sofá, música y más'],DAYMS=1440;
 function mkHouse(i,j){var sd=(PROV*13+i*7+j*3)%10,t=sd<4?0:sd<7?1:sd<9?2:3;return{tier:t,price:Math.round(HP[t]*(.9+((i*5+j*3+PROV)%5)*.05)/100)*100,own:false,rent:null,due:0,ask:0,cands:null};}
 function hlab(b){if(!b.house||!b.lab)return;var h=b.house,U=[h].concat(h.ap||[]);b.lab.el.textContent=!h.own?(h.tier>2?'🏰 ':'🏘️ ')+HN[h.tier]+' · '+fmt(h.price)+' CUP':h.bl?'🏢 Tu edificio · '+U.filter(function(u){return u.rent;}).length+'/'+U.length+' alquilados':h.rent?'🔑 Alquilada · '+h.rent.npc:'🏠 Tu casa · '+HN[h.tier];}
 var BLD=[],LABS=[],HB=null;
@@ -949,7 +949,7 @@ function buildInterior(bd){
     var g=new THREE.Group();g.position.set(x0-w/2+.5+(cw-1)/2,.1,z0-h/2+.5);shapeBuild(g,s[0],cw,s[5]!==undefined?s[5]:t.a);faceT(g,s,t);
     var cells=[];for(var k=0;k<cw;k++){gr[z0][x0+k]='o';cells.push([x0+k,z0]);}
     var it={act:act,cells:cells,px:g.position.x,pz:g.position.z};
-    var rtd=act&&act.special==='room'&&STAY&&STAY.until>Date.now()&&STAY.prov===PROV&&STAY.room===act.n;if(act&&act.special==='room'){var pl=signMesh(String(RN[act.n]),rtd?0x2fa86b:0x555a66,1.1);pl.position.set(0,1.62,.08);g.add(pl);if(rtd)box(1.1,1.7,.06,0x2fc46b,0,.85,-.08,g);}
+    var rtd=act&&act.special==='room'&&STAY&&STAY.until>gm&&STAY.prov===PROV&&STAY.room===act.n;if(act&&act.special==='room'){var pl=signMesh(String(RN[act.n]),rtd?0x2fa86b:0x555a66,1.1);pl.position.set(0,1.62,.08);g.add(pl);if(rtd)box(1.1,1.7,.06,0x2fc46b,0,.85,-.08,g);}
     if(act){g.add(sprite(rtd?'🔑':act.e,2.1,.7));g.userData.item=it;HOME.items.push(it);}else g.userData.block=true;
     HOME.g.add(g);HOME.pick.push(g);
   });
@@ -1121,7 +1121,8 @@ STATS.forEach(function(s){
 });
 var toastT=0;
 function toast(t){sfx('pop');var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('on');},2200);}
-var gm=480,lastMin=-1; // Reloj propio: empieza a las 08:00, sin depender del reloj del teléfono.
+var gm=420,lastMin=-1; // Reloj propio: cada día comienza a las 07:00 y dura 24 horas del juego.
+function gameDayNo(){return Math.floor((gm-420)/1440)+1;}
 var DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],MN=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 var EV=[['🛒','Llegó mercancía'],['🚌','Guagua en la terminal'],['🎶','Música en la plaza'],['⛽','Llegó combustible'],['🌴','Día de sol en el parque']],evI=0,evEnd=gm+13;
 
@@ -1202,7 +1203,7 @@ $('bph').onclick=function(){openSheet('bph','<h3>Mi celular</h3><p>Saldo: <b>'+f
 $('bch').onclick=function(){openSheet('bch','<h3>Chat</h3><div class="msg"><b>Yunior JR</b><br>Llegó mercancía al agropecuario 🛒</div><div class="msg"><b>Lisa1234</b><br>¿Vamos al cine esta noche?</div><div class="msg"><b>Carlito23</b><br>En el taller están pagando bien hoy 🔧</div><div class="msg"><b>Dayana_88</b><br>Nos vemos en el parque 🌴</div>');};
 $('bho').onclick=function(){
   if(trip)return;if(JAIL){toast('Estás preso');return;}closeSheet();var o=[];
-  if(STAY&&STAY.prov===PROV&&STAY.until>Date.now()){var hb=BLD.filter(function(b){return b.key==='hos';})[0];if(hb)o.push(['🏨 Mi habitación '+RN[STAY.room],function(){enterRoom(hb,STAY.room);}]);}
+  if(STAY&&STAY.prov===PROV&&STAY.until>gm){var hb=BLD.filter(function(b){return b.key==='hos';})[0];if(hb)o.push(['🏨 Mi habitación '+RN[STAY.room],function(){enterRoom(hb,STAY.room);}]);}
   BLD.forEach(function(b){if(b.house&&b.house.own&&!b.house.rent)o.push(['🏠 '+b.def.n,function(){enterB(b);}]);});
   if(!o.length){toast('No tienes casa aquí. Reserva en el hotel o compra una');return;}
   if(o.length===1){o[0][1]();return;}
@@ -1348,7 +1349,7 @@ function frame(now){
   $('state').textContent=act?act.k.l:pathQ.length?'En camino':'Con normalidad';
   var mi=Math.floor(gm)%60;
   if(mi!==lastMin){
-    lastMin=Math.floor(gm);var hh=Math.floor(gm/60)%24,mm=mi,dayNo=Math.floor(gm/1440)+1;
+    lastMin=Math.floor(gm);var hh=Math.floor(gm/60)%24,mm=mi,dayNo=gameDayNo();
     var gameClockText=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
     $('tm').textContent=gameClockText;var gh=$('gameTimeHud');if(gh)gh.textContent='🕒 '+gameClockText;
     $('dt').textContent='Día '+dayNo;
@@ -1527,10 +1528,10 @@ function adminClone(o){return JSON.parse(JSON.stringify(o||{}));}
 function paintAdminName(){simLab.el.textContent=(VEH[vi]?VEH[vi][3]:'')+myName+(IS_ADMIN?' [ADM]':'');if(simLab.el)simLab.el.style.color=IS_ADMIN?'#ffd34d':'';}
 function enableAdmin(){
  if(!IS_ADMIN){
-  ADMIN_BACKUP={money:money,owned:owned.slice(),clOwn:adminClone(CL.own),petOwn:adminClone(PET.own),petAct:PET.act};
+  ADMIN_BACKUP={money:money,needs:adminClone(needs),owned:owned.slice(),clOwn:adminClone(CL.own),petOwn:adminClone(PET.own),petAct:PET.act};
   try{localStorage.setItem(SK+'.admBackup',JSON.stringify(ADMIN_BACKUP));}catch(e){}
  }
- IS_ADMIN=true;if(JAIL)release();money=1e12;owned=owned.map(function(){return 1;});
+ IS_ADMIN=true;if(JAIL)release();Object.keys(needs).forEach(function(k){needs[k]=100;});money=1e12;owned=owned.map(function(){return 1;});
  CLO.forEach(function(c){CL.own[c[1]]=1;});
  PETS.forEach(function(p,i){PET.own[i]=1;});
  if(PET.act<0)PET.act=0;
@@ -1538,7 +1539,7 @@ function enableAdmin(){
 }
 function disableAdmin(){
  if(!IS_ADMIN)return;
- if(ADMIN_BACKUP){money=ADMIN_BACKUP.money;owned=ADMIN_BACKUP.owned.slice();CL.own=adminClone(ADMIN_BACKUP.clOwn);PET.own=adminClone(ADMIN_BACKUP.petOwn);PET.act=ADMIN_BACKUP.petAct;}
+ if(ADMIN_BACKUP){money=ADMIN_BACKUP.money;if(ADMIN_BACKUP.needs)Object.keys(needs).forEach(function(k){if(typeof ADMIN_BACKUP.needs[k]==='number')needs[k]=ADMIN_BACKUP.needs[k];});owned=ADMIN_BACKUP.owned.slice();CL.own=adminClone(ADMIN_BACKUP.clOwn);PET.own=adminClone(ADMIN_BACKUP.petOwn);PET.act=ADMIN_BACKUP.petAct;}
  ADMIN_BACKUP=null;IS_ADMIN=false;try{localStorage.removeItem(SK+'.admBackup');}catch(e){}paintAdminName();toast('Modo administrador desactivado · progreso restaurado');
 }
 function runCmd(v){var m=/^\/\$\s*([\d.,]+)\s*$/.exec(v),r;
@@ -1593,7 +1594,7 @@ var VEH=[['A pie',1,0,''],['Bicicleta',1.6,1200,'🚲 '],['Moto',2.4,4000,'🏍�
 var APPS=[['per','🧍','Personaje'],['veh','🚗','Vehículos'],['fab','🏭','Fábrica'],['pet','🐾','Mascotas'],['via','✈️','Viajar'],['mapa','🚕','Taxi'],['cht','💬','Chat']];
 function tcost(i){return Math.round((400+Math.abs(PV[i].x-PV[PROV].x)*360)/10)*10;}
 function ttime(i){return Math.max(3,Math.round((6+Math.abs(PV[i].x-PV[PROV].x)*3)/VEH[vi][1]));}
-function sbars(){return STATS.map(function(s){return s[1]+' '+Math.round(needs[s[0]])+'/100<div class="bar2"><i style="width:'+needs[s[0]]+'%"></i></div>';}).join('')+'<p>💪 Fuerza: <b>'+GYM.str+'</b> · '+(GYM.last===new Date().toDateString()?'ya entrenaste hoy':'gym disponible hoy')+'</p>';}
+function sbars(){return STATS.map(function(s){return s[1]+' '+Math.round(needs[s[0]])+'/100<div class="bar2"><i style="width:'+needs[s[0]]+'%"></i></div>';}).join('')+'<p>💪 Fuerza: <b>'+GYM.str+'</b> · '+(GYM.last===gameDayNo()?'ya entrenaste hoy':'gym disponible hoy')+'</p>';}
 function mkVeh(k){
   var g=new THREE.Group();
   function bx(w,h,d,c,x,y,z){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);g.add(m);}
@@ -1792,7 +1793,7 @@ $('bph').onclick=phTog;$('bph2').onclick=phTog;
 // ---------- trabajo: pago por horario, ascensos, mipymes y fábrica ----------
 var PAYQ=0,PENDING=null,WK={},RANKS=[['Aprendiz',0,1],['Empleado',5,1.15],['Supervisor',15,1.3],['Jefe',30,1.5]];
 function rankOf(j){var n=WK[j]||0,r=0;RANKS.forEach(function(x,k){if(n>=x[1])r=k;});return r;}
-function shiftNow(){var h=new Date().getHours();return h<6?['madrugada',1.9]:h<12?['mañana',1]:h<18?['tarde',1.2]:['noche',1.5];}
+function shiftNow(){var h=(gm/60)%24;return h<6?['madrugada',1.9]:h<12?['mañana',1]:h<18?['tarde',1.2]:['noche',1.5];}
 function payFor(kd){var j=kd.job||kd.l;return clamp(Math.round(kd.pay*shiftNow()[1]*RANKS[rankOf(j)][2]/10)*10,500,2000);}
 function ask(it){
   var kd=it.act,j=kd.job||kd.l,sf=shiftNow(),r=rankOf(j),nx=RANKS[r+1],p=payFor(kd);PAYQ=p;PENDING=it;
@@ -1892,15 +1893,15 @@ setInterval(function(){
 
 // ---------- hotel, casas y alquiler ----------
 var HOPT=[],RB=null;
-function ftm(ms){var q=Math.max(0,Math.ceil(ms/1000));return Math.floor(q/60)+':'+('0'+q%60).slice(-2);}
+function ftm(gameMinutes){var q=Math.max(0,Math.ceil(gameMinutes));return Math.floor(q/60)+' h '+('0'+q%60).slice(-2)+' min de juego';}
 function enterRoom(hb,k){enterB({key:'room',def:{n:'Habitación '+RN[k],e:'🛏️'},tier:RT[k],hotel:hb});}
 function special(kd){
   if(kd.special==='recep'){recepPanel();return;}
-  if(kd.special==='room'){var ok=STAY&&STAY.until>Date.now()&&STAY.prov===PROV&&STAY.room===kd.n;if(ok)enterRoom(inB,kd.n);else toast('Cerrada · reserva en recepción');}
+  if(kd.special==='room'){var ok=STAY&&STAY.until>gm&&STAY.prov===PROV&&STAY.room===kd.n;if(ok)enterRoom(inB,kd.n);else toast('Cerrada · reserva en recepción');}
 }
 function recepPanel(){
-  var now=Date.now(),on=STAY&&STAY.until>now&&STAY.prov===PROV;
-  var h='<h3>🏨 Hotel · Recepción</h3><p>1 día = '+(DAYMS/60000)+' min reales. '+(on?'Tu habitación <b>'+RN[STAY.room]+'</b>: quedan <b>'+Math.ceil((STAY.until-now)/DAYMS)+' día(s)</b> ('+ftm(STAY.until-now)+'). Puedes pagar más días.':'Elige habitación y cuántos días pagas. Al terminar, tienes que salir.')+'</p>';
+  var now=gm,on=STAY&&STAY.until>now&&STAY.prov===PROV;
+  var h='<h3>🏨 Hotel · Recepción</h3><p>1 día = 24 horas del juego. '+(on?'Tu habitación <b>'+RN[STAY.room]+'</b>: quedan <b>'+Math.ceil((STAY.until-now)/DAYMS)+' día(s)</b> ('+ftm(STAY.until-now)+'). Puedes pagar más días.':'Elige habitación y cuántos días pagas. Al terminar, tienes que salir.')+'</p>';
   RN.forEach(function(n,k){if(on&&STAY.room!==k)return;h+='<div class="msg"><b>'+n+' · '+RTN[k]+(on&&STAY.room===k?' ✅ Tuya':'')+'</b> · '+fmt(RP[k])+' CUP/día<br><small>'+RD[k]+'</small><br>'+[1,3,7].map(function(d){return '<button class="go" data-do="book" data-v="'+k+':'+d+'">'+d+(d>1?' días':' día')+' · '+fmt(RP[k]*d)+'</button>';}).join(' ')+'</div>';});
   openSheet('rec',h);
 }
@@ -1914,7 +1915,7 @@ $('go2').onclick=function(){var b=curB;if(b&&!b.house&&SHOPS[b.key]&&!trip&&!act
 function mkCands(){return NAMES.slice().sort(function(){return Math.random()-.5;}).slice(0,3).map(function(n){var mn=Math.floor(rnd(0,4));return{n:n,min:mn,bud:Math.round(HR[mn]*rnd(.8,1.5)/10)*10,days:Math.floor(rnd(3,9))};});}
 function rentPanel(b){
   RB=b;if(b.house.bl&&!RU){bldPanel(b);return;}var h=RU||b.house,out;
-  if(h.rent){out='<h3>🔑 '+b.def.n+'</h3><p>Inquilino: <b>'+h.rent.npc+'</b> · '+fmt(h.rent.price)+' CUP/día<br>Contrato: quedan '+Math.max(0,Math.ceil((h.rent.until-Date.now())/DAYMS))+' día(s)<br>Por cobrar: <b>'+fmt(h.due)+' CUP</b></p><button class="go" data-do="rcol">Cobrar</button>';}
+  if(h.rent){out='<h3>🔑 '+b.def.n+'</h3><p>Inquilino: <b>'+h.rent.npc+'</b> · '+fmt(h.rent.price)+' CUP/día<br>Contrato: quedan '+Math.max(0,Math.ceil((h.rent.until-gm)/DAYMS))+' día(s)<br>Por cobrar: <b>'+fmt(h.due)+' CUP</b></p><button class="go" data-do="rcol">Cobrar</button>';}
   else{if(!h.ask)h.ask=HR[h.tier];if(!h.cands)h.cands=mkCands();
     out='<h3>🔑 Alquilar · '+b.def.n+'</h3><p>Precio por día: <button class="go" data-do="rp" data-v="-50">−50</button> <b>'+fmt(h.ask)+' CUP</b> <button class="go" data-do="rp" data-v="50">+50</button></p><p>Interesados. Cada uno acepta o no según lo que exige:</p>'+
     h.cands.map(function(c,k){var r=c.bud/HR[c.min];return '<div class="msg"><b>'+c.n+'</b> · '+c.days+' días<br><small>Exige: calidad mínima «'+HN[c.min]+'» · presupuesto '+(r<1?'ajustado':r<1.25?'normal':'holgado')+'</small><br><button class="go" data-do="roff" data-v="'+k+'">Ofrecer</button></div>';}).join('')+'<button class="go" data-do="rnew">Buscar otros</button>';}
@@ -1927,11 +1928,11 @@ function offer(k){
   else if(h.ask>c.bud*(1+.25*(h.tier-c.min)))why='dice que el precio es muy alto';
   else if(Math.random()<.1)why='lo pensó mejor y se echó atrás';
   if(why){h.cands.splice(k,1);toast('❌ '+c.n+' '+why);if(!h.cands.length)h.cands=null;rentPanel(b);return;}
-  var n=Date.now();h.rent={npc:c.n,price:h.ask,until:n+c.days*DAYMS,last:n};h.cands=null;sfx('coin');toast('✅ '+c.n+' aceptó alquilar');hlab(b);rentPanel(b);
+  var n=gm;h.rent={npc:c.n,price:h.ask,until:n+c.days*DAYMS,last:n};h.cands=null;sfx('coin');toast('✅ '+c.n+' aceptó alquilar');hlab(b);rentPanel(b);
 }
 $('panel').addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;var d=b.dataset,x=d.do;if(!x)return;
-  if(x==='book'){var q=d.v.split(':'),k=+q[0],n=+q[1],c=RP[k]*n,now=Date.now();
+  if(x==='book'){var q=d.v.split(':'),k=+q[0],n=+q[1],c=RP[k]*n,now=gm;
     if(STAY&&STAY.until>now&&(STAY.room!==k||STAY.prov!==PROV)){toast('Ya tienes otra habitación reservada');return;}
     if(money<c){toast('Te faltan '+fmt(c-money)+' CUP');return;}
     money-=c;STAY={room:k,prov:PROV,until:(STAY&&STAY.until>now?STAY.until:now)+n*DAYMS};sfx('coin');toast('🛎️ Habitación '+RN[k]+' · '+n+' día(s)');if(cur===HOME&&inB&&inB.key==='hos'){var qx=sim.position.x,qz=sim.position.z;buildInterior(inB);sim.position.x=qx;sim.position.z=qz;}recepPanel();}
@@ -1942,7 +1943,7 @@ $('panel').addEventListener('click',function(e){
   else if(x==='rcol'){collect(RU||RB.house);rentPanel(RB);}
 });
 setInterval(function(){
-  var now=Date.now();
+  var now=gm;
   if(STAY&&STAY.until<=now){var was=inB&&inB.key==='room'&&cur===HOME,hb=was?inB.hotel:null;STAY=null;toast('⏰ Terminó tu estadía en el hotel');if(was)enterB(hb);else if(cur===HOME&&inB&&inB.key==='hos'){var qx=sim.position.x,qz=sim.position.z;buildInterior(inB);sim.position.x=qx;sim.position.z=qz;}}
   Object.keys(HOUSES).forEach(function(k){var H0=HOUSES[k];[H0].concat(H0.ap||[]).forEach(function(h){var r=h.rent;if(!r)return;
     var n=Math.floor((Math.min(now,r.until)-r.last)/DAYMS+1e-6);if(n>0){h.due+=n*r.price;r.last+=n*DAYMS;}
@@ -2011,7 +2012,7 @@ function wdPanel(){WDSTORE=true;openSheet('wd',wdHTML(true));}
 APPS.push(['clo','🧥','Ropa']);
 APPS.push(['adm','🏘️','Mis casas']);
 function admHTML(){var rows=[];Object.keys(HOUSES).forEach(function(k){var H0=HOUSES[k];if(!H0.own)return;var m=/^(\d+):(\d+),(\d+)$/.exec(k),p=PV[+m[1]];[H0].concat(H0.ap||[]).forEach(function(h,i){if(!h.rent)return;
-  rows.push('<div class="msg"><b>'+(H0.bl?'🏢 Apt. '+i:'🏠 '+HN[H0.tier])+'</b> · 📍 '+p.c+', cuadra '+(+m[2]+1)+'-'+(+m[3]+1)+'<br>Inquilino: <b>'+h.rent.npc+'</b> · '+fmt(h.rent.price)+' CUP/día<br>Contrato: quedan '+Math.max(0,Math.ceil((h.rent.until-Date.now())/DAYMS))+' día(s) · Por cobrar: <b>'+fmt(h.due)+' CUP</b></div>');});});
+  rows.push('<div class="msg"><b>'+(H0.bl?'🏢 Apt. '+i:'🏠 '+HN[H0.tier])+'</b> · 📍 '+p.c+', cuadra '+(+m[2]+1)+'-'+(+m[3]+1)+'<br>Inquilino: <b>'+h.rent.npc+'</b> · '+fmt(h.rent.price)+' CUP/día<br>Contrato: quedan '+Math.max(0,Math.ceil((h.rent.until-gm)/DAYMS))+' día(s) · Por cobrar: <b>'+fmt(h.due)+' CUP</b></div>');});});
   return '<button class="bk" data-app="">‹ Atrás</button><h3>🏘️ Administrar casas</h3>'+(rows.length?'<p>Lo que estás alquilando:</p>'+rows.join(''):'<p>No estás alquilando nada.</p>');}
 var _page2=page;page=function(a){return a==='adm'?admHTML():_page2(a);};
 var _page=page;page=function(a){if(a==='clo'){WDSTORE=false;return '<button class="bk" data-app="">‹ Atrás</button>'+wdHTML(false);}return _page(a);};
@@ -2162,7 +2163,7 @@ $('panel').addEventListener('click',function(e){
   else if(x==='hv'){var p=F.pl[+v];if(!p)return;F.food+=CROPS[p.c][4];F.pl[+v]=null;sfx('coin');closeSheet();refreshFarm();toast('+'+CROPS[p.c][4]+' porciones al almacén');}
   else if(x==='eatf'){ftick(F);if(F.food>=1){F.food-=1;needs.hunger=clamp(needs.hunger+35,0,100);needs.health=clamp(needs.health+2,0,100);}storePanel();}
   else if(x==='sellf'){ftick(F);var n=Math.floor(F.food);if(n>0){F.food-=n;money+=n*60;sfx('coin');toast('+'+fmt(n*60)+' CUP');}storePanel();}
-  else if(x==='grow'){if(money<30000){toast('Te faltan '+fmt(30000-money)+' CUP');return;}money-=30000;F.lvl=1;farmGfx(inB);farmLab(inB);sfx('build');toast('🐄 ¡Ahora es una granja!');closeSheet();refreshFarm();}
+  else if(x==='grow'){if(money<12000){toast('Te faltan '+fmt(12000-money)+' CUP');return;}money-=12000;F.lvl=1;farmGfx(inB);farmLab(inB);sfx('build');toast('🐄 ¡Ahora es una granja!');closeSheet();refreshFarm();}
   else if(x==='buyan'){var a=ANI[+v];if(F.an[+v]>=6)return;if(money<a[2]){toast('No te alcanza el dinero');return;}money-=a[2];ftick(F);F.an[+v]++;sfx('coin');growPanel();refreshFarm();}
 });
 
@@ -2348,7 +2349,7 @@ $('panel').addEventListener('click',function(e){
 Object.assign(ITEMS,{lift:{e:'🏋️',l:'Entrenando',gym:1}});
 TPL.gym={w:14,h:10,f:[0x3a3f4a,0x343944],wl:0x5a6070,a:0xe0554f,it:[['bench',2,3,'lift',3],['bench',7,3,'lift',3],['bench',11,3,'lift',2],['counter',2,7,'smooth',3],['cabinet',12,7,null]]};
 function doGym(){
-  var t=new Date().toDateString();
+  var t=gameDayNo();
   if(GYM.last===t){toast('Ya entrenaste hoy · vuelve mañana');return;}
   if(needs.energy<20){toast('Estás muy cansado para entrenar');return;}
   if(money<150){toast('El gimnasio cuesta 150 CUP');return;}
@@ -2666,11 +2667,11 @@ function showJailDetainees(){
   rows.forEach(function(r,i){var src=r.p,sh=0xe0554f,ha=0x493326,pa=0x2d3e6b;src.traverse(function(o){if(!o.isMesh||!o.material||!o.material.color)return;if(o.userData.role==='shirt')sh=o.material.color.getHex();if(o.userData.role==='hair')ha=o.material.color.getHex();if(o.userData.role==='pants')pa=o.material.color.getHex();});var g=person(sh,ha,src.scale.x||.7);g.traverse(function(o){if(o.isMesh&&o.userData.role==='pants')o.material=M(pa);});var q=spots[i]||[Math.floor(HOME.w/2)+i-1,Math.floor(HOME.h/2)];g.position.set(q[0]-HOME.w/2+.5,.08,q[1]-HOME.h/2+.5);g.rotation.y=Math.PI;g.userData.jailNpc=1;HOME.g.add(g);sitInteriorNpc(g);box(.8,.08,.08,0x555b64,g.position.x,.62,g.position.z-.28,HOME.g);});
 }
 function arrestFightPair(F){
-  if(!F||FIGHT!==F)return;FIGHT=null;var jb=BLD.filter(function(b){return b.key==='jai';})[0];
+  if(!F||FIGHT!==F)return;FIGHT=null;var jb=BLD.filter(function(b){return b.key==='jai';})[0],reward=500;money+=reward;sfx('coin');
   [F.a,F.b].forEach(function(p,i){if(!p||!p.parent)return;var u=p.userData;u.fight=false;u.cd=Date.now()+120000;u.arrested=true;u.path=[];nbub(p,'🔒 Detenido');
     if(jb){p.position.set(jb.x,0,jb.z);p.visible=false;}
     NPCJAIL.push({p:p,until:Date.now()+90000});
-  });toast('🚔 Los dos NPC fueron llevados a la cárcel por 90 segundos.');
+  });toast('🚔 Los dos NPC fueron llevados a la cárcel por 90 segundos. Recompensa: +'+fmt(reward)+' CUP por avisar a la policía.');
 }
 setInterval(function(){var n=Date.now();NPCJAIL=NPCJAIL.filter(function(r){if(n<r.until)return true;var p=r.p;if(p&&p.parent){p.userData.arrested=false;p.visible=true;p.userData.cd=n+20000;p.userData.wait=2;nbub(p,'');var rc=roadCell([Math.floor(p.position.x+CITY.w/2),Math.floor(p.position.z+CITY.h/2)]);p.position.set(cx(CITY,rc[0]),0,cz(CITY,rc[1]));}return false;});},1000);
 // Pareja NPC: acepta o rechaza según las necesidades y acompaña al jugador.
@@ -2764,7 +2765,7 @@ setInterval(function(){
     if(A.ri<2){var w=A.ri?A.b:A.a;if(mvTo(cp,w.position.x,w.position.z+1.1,3.2,dt)){A.rt+=dt;cp.rotation.y=Math.PI;animP(cp,'hammer',A.rt*2);if(A.rt>3.5){fixCar(w);rmEnt(A.sp[A.ri]);A.ri++;A.rt=0;}}}
     else if(mvTo(cp,A.pc.position.x,A.pc.position.z,3.2,dt)){rmEnt(cp);A.st=3;var pc=[Math.floor(A.pc.position.x+CITY.w/2),Math.floor(A.pc.position.z+CITY.h/2)];A.pc.userData.path=bfs(CITY,pc[0],pc[1],function(x,z){return Math.abs(x-pc[0])+Math.abs(z-pc[1])>=14;})||[];}
   }
-  else if(A.st===3){if(stepV(A.pc,dt,6.5)&&(A.fd||!A.fr.parent)){toast('✅ La policía reparó el desastre');accEnd();}}
+  else if(A.st===3){if(stepV(A.pc,dt,6.5)&&(A.fd||!A.fr.parent)){var reward=300;money+=reward;sfx('coin');toast('✅ La policía reparó el desastre. Recompensa: +'+fmt(reward)+' CUP');accEnd();}}
 },50);
 // ----- guardado automático y botón de empezar de nuevo -----
 function saveGame(){if(RESET)return;try{
@@ -2783,7 +2784,7 @@ setInterval(saveGame,3000);window.addEventListener('pagehide',saveGame);document
     return;}
   if(typeof s.money==='number')money=s.money;
   if(s.needs)Object.keys(needs).forEach(function(k){if(typeof s.needs[k]==='number')needs[k]=s.needs[k];});
-  job=s.job||job;WK=s.WK||{};if(s.owned)owned=s.owned;HOUSES=s.HOUSES||{};STAY=s.STAY||null;FAC=s.FAC||null;FARMS=s.FARMS||{};CL=s.CL||{own:{},eq:{}};if(s.PET)PET=s.PET;REST=s.REST||null;if(s.GYM)GYM=s.GYM;
+  job=s.job||job;WK=s.WK||{};if(s.owned)owned=s.owned;HOUSES=s.HOUSES||{};STAY=s.STAY||null;FAC=s.FAC||null;FARMS=s.FARMS||{};CL=s.CL||{own:{},eq:{}};if(s.PET)PET=s.PET;REST=s.REST||null;if(s.GYM){GYM=s.GYM;if(typeof GYM.last!=='number')GYM.last=-1;}
   if(typeof s.vi==='number'&&owned[s.vi]){vi=s.vi;setVehOn(sim,vi);}
   if(s.myCol)myCol=s.myCol;if(s.LOOK){['pants','hair','shoes','skin'].forEach(function(k){if(s.LOOK[k])setLook(k,s.LOOK[k]);});LOOK.hs=s.LOOK.hs|0;LOOK.sz=s.LOOK.sz||1;applyStyle();}setLook('shirt',myCol);
   muted=!!s.muted;if(master)master.gain.value=muted?0:.8;
@@ -2795,6 +2796,10 @@ setInterval(saveGame,3000);window.addEventListener('pagehide',saveGame);document
   placeSim(CITY,HB.front[0]+1,HB.front[1]);
   if(s.playerPos&&Number.isFinite(s.playerPos.x)&&Number.isFinite(s.playerPos.z)){sim.position.set(s.playerPos.x,Number.isFinite(s.playerPos.y)?s.playerPos.y:baseY(),s.playerPos.z);if(Number.isFinite(s.playerPos.rot))sim.rotation.y=s.playerPos.rot;}
   if(typeof s.gameMinutes==='number'&&Number.isFinite(s.gameMinutes))gm=s.gameMinutes;
+  // Migra reservas y alquileres guardados con el reloj real de versiones anteriores al reloj del juego.
+  function migrateGameDeadline(obj,key){if(obj&&typeof obj[key]==='number'&&obj[key]>1e10){obj[key]=gm+Math.max(0,(obj[key]-Date.now())/360000*1440);}}
+  migrateGameDeadline(STAY,'until');
+  Object.keys(HOUSES||{}).forEach(function(k){var h=HOUSES[k];[h].concat(h&&h.ap||[]).forEach(function(a){if(a&&a.rent){var oldLast=a.rent.last;migrateGameDeadline(a.rent,'until');if(typeof oldLast==='number'&&oldLast>1e10)a.rent.last=gm-Math.max(0,(Date.now()-oldLast)/360000*1440);}});});
   TAG=s.TAG||0;if(s.REC)REC=s.REC;JAIL=s.JAIL||null;if(JAIL){if(JAIL.until>Date.now())jailIn();else JAIL=null;}
   // Tras reiniciar, el modo administrador queda apagado: el guardado conserva el estado previo.
   IS_ADMIN=false;ADMIN_BACKUP=null;try{localStorage.removeItem(SK+'.admBackup');}catch(e){}
