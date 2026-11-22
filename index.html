@@ -1,7 +1,19 @@
-<!doctype html><html><head><meta charset=utf8><title>The Sims Cuba</title><link rel=manifest href=manifest.json><meta name=theme-color content=#0d1633><meta name=mobile-web-app-capable content=yes><meta name=apple-mobile-web-app-capable content=yes><link rel=apple-touch-icon href=icon-192.png><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+<!doctype html><html><head><meta charset=utf8><title>The Sims Cuba</title><link rel=manifest href=manifest.json><meta name=theme-color content=#0d1633><meta name=mobile-web-app-capable content=yes><meta name=apple-mobile-web-app-capable content=yes><link rel=apple-touch-icon href=icon-192.png><meta name=viewport content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
 /* Acciones contextuales en la misma fila compacta de controles */
 @media(max-width:600px){#bsnd{left:max(154px,calc(env(safe-area-inset-left,0px) + 154px))!important} }
-</style></head><body>
+</style><script>
+(function(){
+  document.addEventListener('touchstart',function(e){if(e.touches && e.touches.length>1)e.preventDefault();},{passive:false});
+  document.addEventListener('touchmove',function(e){if(e.touches && e.touches.length>1)e.preventDefault();},{passive:false});
+  ['gesturestart','gesturechange','gestureend'].forEach(function(type){document.addEventListener(type,function(e){e.preventDefault();},{passive:false});});
+  document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:false});
+})();
+</script><style>
+/* Botón de interacción (Entrar/Salir/Comprar): centrado y abajo. */
+#card{left:50%!important;right:auto!important;top:auto!important;bottom:max(6px,env(safe-area-inset-bottom,0px))!important;transform:translateX(-50%)!important;}
+@media(max-width:600px){#card{left:50%!important;bottom:max(6px,env(safe-area-inset-bottom,0px))!important;}}
+</style>
+</head><body>
 
 <title>Casita Sim</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -58,6 +70,7 @@ button{font-family:inherit}button:focus-visible{outline:2px solid #fff;outline-o
 .lb.np{background:none;border:0;padding:0;font-size:14px;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 .lb.bub{background:#fff;color:#111;border:1px solid #888;font-weight:500;font-size:12px}
 .lb.me{background:var(--red);border-color:#ff8a8a;font-size:12px;padding:3px 9px}
+.lb.jobstat{white-space:pre-line;text-align:center;line-height:1.25;font-size:10px;padding:5px 8px;border-radius:9px;background:rgba(8,17,47,.94);border-color:rgba(132,163,255,.7);min-width:112px}
 #card{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);background:#0f1a44;border:1px solid #243170;border-radius:20px;padding:8px 12px;text-align:center;min-width:140px;max-width:calc(100% - 32px);box-sizing:border-box}
 #card b{font-size:14px;display:block;margin-bottom:6px}#go2{background:#16255f;color:#cfd8ff;border:1px solid #2c3a78;border-radius:10px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer;margin-left:6px}
 #go{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:6px 12px;font-weight:700;font-size:13px;cursor:pointer;max-width:100%}
@@ -75,13 +88,43 @@ button{font-family:inherit}button:focus-visible{outline:2px solid #fff;outline-o
 #toast{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(15,26,68,.96);border:1px solid #2b43c8;border-radius:12px;padding:8px 14px;font-weight:700;opacity:0;transition:opacity .25s;pointer-events:none;max-width:calc(100% - 32px)}
 #toast.on{opacity:1}
 #sheet{position:absolute;inset:0;z-index:40;background:rgba(5,8,25,.72);display:flex;align-items:flex-end}
-body:has(#sheet:not([hidden])) #nav,body:has(#sheet:not([hidden])) #card,body:has(#sheet:not([hidden])) #moneyHud,body:has(#sheet:not([hidden])) #minimap,body:has(#sheet:not([hidden])) #bph2,body:has(#sheet:not([hidden])) #bmn,body:has(#sheet:not([hidden])) #bctr{visibility:hidden!important;pointer-events:none!important}
+body:has(#sheet:not([hidden])) #nav,body:has(#sheet:not([hidden])) #card,body:has(#sheet:not([hidden])) #moneyHud,body:has(#sheet:not([hidden])) #minimap,body:has(#sheet:not([hidden])) #bmn,body:has(#sheet:not([hidden])) #bctr{visibility:hidden!important;pointer-events:none!important}
+body:has(#sheet:not([hidden])) #bph2{visibility:visible!important;pointer-events:auto!important;z-index:100!important}
+body:has(#sheet:not([hidden])) #bph2{position:fixed!important}
 body:has(#sheet:not([hidden])) #sheet{pointer-events:auto}body:has(#sheet:not([hidden])) #panel{max-height:82%;}
 /* Al abrir chat/ventanas, los controles quedan arriba y por encima del panel, sin tapar mensajes. */
 #bph2,#bmn,#bctr{z-index:30;transition:top .15s,bottom .15s}
-body:has(#sheet:not([hidden])) #bph2,body:has(#sheet:not([hidden])) #bmn,body:has(#sheet:not([hidden])) #bctr{top:max(10px,env(safe-area-inset-top,0px));bottom:auto}
+body:has(#sheet:not([hidden])) #bmn,body:has(#sheet:not([hidden])) #bctr{top:max(10px,env(safe-area-inset-top,0px));bottom:auto}
+body:has(#sheet:not([hidden])) #bph2{top:auto!important;bottom:max(14px,env(safe-area-inset-bottom,0px))!important;left:max(10px,env(safe-area-inset-left,0px))!important;right:auto!important}
 /* Al abrir el chat, la barra de estadísticas sube y queda fuera del panel. */
 body:has(#sheet:not([hidden])) #needsHud{top:max(10px,env(safe-area-inset-top,0px));bottom:auto;right:10px;z-index:30;width:clamp(112px,19vw,164px)}
+#jobStatsHud{display:none;position:absolute;left:max(10px,env(safe-area-inset-left,0px));top:70px;z-index:18;width:min(245px,calc(100% - 20px));box-sizing:border-box;padding:7px 9px;border:1px solid rgba(132,163,255,.62);border-radius:11px;background:rgba(8,17,47,.94);color:#eef3ff;font-size:10px;line-height:1.3;backdrop-filter:blur(8px);pointer-events:none;box-shadow:0 3px 12px #0007;overflow:visible;white-space:normal}#jobStatsHud.active{display:block}#jobStatsHud b{color:#fff}#jobStatsHud .jsh{font-size:11px;font-weight:800;margin-bottom:4px;white-space:normal;overflow-wrap:anywhere}#jobStatsHud .jsrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:5px;margin:2px 0}#jobStatsHud .jsrow span{min-width:0;white-space:normal;overflow-wrap:anywhere}#jobStatsHud .jsrow b{text-align:right;white-space:normal;overflow-wrap:anywhere}#jobStatsHud .jsbar{height:4px;background:#26365f;border-radius:9px;overflow:hidden;margin:3px 0 4px}#jobStatsHud .jsbar i{display:block;height:100%;background:#55d68b}#jobStatsHud .muted{color:#aebde5;white-space:normal;overflow-wrap:anywhere}@media(max-width:600px){#jobStatsHud{top:68px;width:min(235px,calc(100% - 20px));font-size:9.5px;padding:6px 8px}#jobStatsHud .jsh{font-size:10.5px}}body:has(#sheet:not([hidden])) #jobStatsHud{display:none!important}
+/* Teléfono compacto con isla dinámica superior para arrastrarlo. */
+body.phone-open #sheet{background:transparent;display:block;pointer-events:none;padding:0}
+/* Con el teléfono abierto, los toques fuera del panel atraviesan la capa y llegan al mundo para mover al personaje. */
+body.phone-open:has(#sheet:not([hidden])) #sheet{pointer-events:none!important}
+body.phone-open:has(#sheet:not([hidden])) #panel{pointer-events:auto!important}
+body.phone-open #panel{pointer-events:auto;position:absolute;right:14px;bottom:174px;width:280px;height:390px;max-width:calc(100vw - 42px);max-height:calc(100dvh - 205px);margin:0;padding:12px;box-sizing:border-box;padding-top:28px;border:1px solid rgba(112,139,225,.65);border-radius:22px;background:linear-gradient(155deg,#17264f,#09132e);box-shadow:0 8px 26px #000b;overflow-y:auto;overscroll-behavior:contain}
+body.phone-open #needsHud{top:auto!important;bottom:14px!important;right:8px!important;z-index:42}
+body.phone-open .apps{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:8px}
+body.phone-open .apps button{min-width:0;padding:6px 1px;border-radius:10px;font-size:10px;line-height:1.15}
+body.phone-open .apps button span{font-size:20px;line-height:1.1;margin-bottom:3px}
+body.phone-open .apps button{touch-action:pan-y;transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,opacity .22s;position:relative}body.phone-open .apps button.app-lift{z-index:20;transform:scale(1.12) rotate(-3deg);box-shadow:0 10px 24px #0009;opacity:.92;outline:2px solid #9fc4ff}body.phone-open .apps button.app-target{transform:scale(.94);outline:2px dashed #fff}body.phone-open .apps button.app-settle{animation:appSettle .28s ease-out}@keyframes appSettle{0%{transform:scale(.88)}65%{transform:scale(1.08)}100%{transform:scale(1)}}
+body.phone-open #panel h3{font-size:16px}body.phone-open #panel p,body.phone-open #panel li{font-size:12px}body.phone-open #panel .pv{font-size:12px;padding:7px 8px}body.phone-open #panel input,body.phone-open #panel select{max-width:100%;box-sizing:border-box}
+@media(max-width:600px){body.phone-open #panel{right:10px;bottom:174px;width:260px;height:360px;max-height:calc(100dvh - 195px);padding:10px}}
+body.phone-open #panel.phone-moving{user-select:none;cursor:grabbing}
+body.phone-open #phone-drag-island{position:absolute;z-index:25;top:8px;left:50%;transform:translateX(-50%);width:76px;height:7px;border-radius:99px;background:#fff;box-shadow:0 1px 5px #0008;cursor:grab;touch-action:none}
+body.phone-open #phone-drag-island:active{background:#e8e8e8;cursor:grabbing}
+/* Bordes táctiles para cambiar el tamaño del teléfono */
+body.phone-open .phone-resize{position:absolute;z-index:8;touch-action:none;background:transparent}
+body.phone-open .phone-resize.e,body.phone-open .phone-resize.w{top:8px;bottom:8px;width:18px;cursor:ew-resize}
+body.phone-open .phone-resize.e{right:-5px}body.phone-open .phone-resize.w{left:-5px}
+body.phone-open .phone-resize.n,body.phone-open .phone-resize.s{left:8px;right:8px;height:18px;cursor:ns-resize}
+body.phone-open .phone-resize.n{top:-5px}body.phone-open .phone-resize.s{bottom:-5px}
+body.phone-open .phone-resize.ne,body.phone-open .phone-resize.nw,body.phone-open .phone-resize.se,body.phone-open .phone-resize.sw{width:24px;height:24px}
+body.phone-open .phone-resize.ne{right:-5px;top:-5px;cursor:nesw-resize}body.phone-open .phone-resize.nw{left:-5px;top:-5px;cursor:nwse-resize}
+body.phone-open .phone-resize.se{right:-5px;bottom:-5px;cursor:nwse-resize}body.phone-open .phone-resize.sw{left:-5px;bottom:-5px;cursor:nesw-resize}
+
 @media(max-width:600px){body:has(#sheet:not([hidden])) #needsHud{top:max(10px,env(safe-area-inset-top,0px));right:8px;width:104px;padding:7px;gap:5px}}
 .panel{background:#0f1a44;border-top:1px solid #243170;border-radius:20px 20px 0 0;padding:16px max(16px,env(safe-area-inset-left,0px)) 18px;max-height:75%;overflow:auto;width:100%;box-sizing:border-box}
 .panel h3{margin:0 0 8px;font-size:20px}.panel ul{padding-left:18px;margin:6px 0}.panel li{margin:4px 0}
@@ -248,6 +291,7 @@ body:has(#menu:not([hidden])) #mg {
     <div class="nhrow"><span class="nhico">🙂</span><div class="nhbar"><i id="nhMood" style="background:#8b5cf6"></i></div></div>
     <div class="nhrow"><span class="nhico">❤</span><div class="nhbar"><i id="nhHealth" style="background:#ef2b4b"></i></div></div>
   </div>
+  <div id="jobStatsHud" aria-label="Estadísticas de empleo"></div>
   <div id="card" hidden><b id="ct"></b><button id="go"></button><button id="go2" hidden></button></div>
   <button id="bph2">📱</button><button id="bmn">☰</button><button id="bctr">🎯</button>
   <div id="legacyUiHooks" hidden><button id="bph"></button><button id="bch"></button><button id="bho"></button><button id="bea"></button></div>
@@ -593,7 +637,7 @@ function building0(i,j,key){
 }
 for(var j=0;j<5;j++)for(var i=0;i<7;i++)building(i,j,L[j][i]);
 // Farolas compartidas: pocos focos para iluminar la ciudad sin sobrecargar el móvil.
-for(var li=0;li<15;li++){var lx=-24+(li%5)*12,lz=-24+Math.floor(li/5)*24,lg=new THREE.Group();lg.position.set(lx,0,lz);CITY.g.add(lg);var pole=new THREE.Mesh(new THREE.CylinderGeometry(.055,.085,3.8,6),M(0x424b59));pole.position.y=1.9;lg.add(pole);var arm=new THREE.Mesh(new THREE.BoxGeometry(.65,.07,.07),M(0x424b59));arm.position.set(.28,3.72,0);lg.add(arm);var bulb=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xffffff}));bulb.position.set(.55,3.65,0);lg.add(bulb);var lampLight=new THREE.PointLight(0xffffff,0,24,1.8);lampLight.position.copy(bulb.position);lg.add(lampLight);var lampGlow=glowSprite(4.8,4.8,.58);lampGlow.position.copy(bulb.position);lampGlow.visible=false;lg.add(lampGlow);streetLamps.push({bulb:bulb,light:lampLight,glow:lampGlow});}
+if(P.i!==7)for(var li=0;li<15;li++){var lx=-24+(li%5)*12,lz=-24+Math.floor(li/5)*24,lg=new THREE.Group();lg.position.set(lx,0,lz);CITY.g.add(lg);var pole=new THREE.Mesh(new THREE.CylinderGeometry(.055,.085,3.8,6),M(0x424b59));pole.position.y=1.9;lg.add(pole);var arm=new THREE.Mesh(new THREE.BoxGeometry(.65,.07,.07),M(0x424b59));arm.position.set(.28,3.72,0);lg.add(arm);var bulb=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),new THREE.MeshBasicMaterial({color:0xffffff}));bulb.position.set(.55,3.65,0);lg.add(bulb);var lampLight=new THREE.PointLight(0xffffff,0,24,1.8);lampLight.position.copy(bulb.position);lg.add(lampLight);var lampGlow=glowSprite(4.8,4.8,.58);lampGlow.position.copy(bulb.position);lampGlow.visible=false;lg.add(lampGlow);streetLamps.push({bulb:bulb,light:lampLight,glow:lampGlow});}
 
 function building(i,j,key){var n=CITY.g.children.length;building0(i,j,key);if(D[key]&&D[key].park)return;for(var k=n;k<CITY.g.children.length;k++){var o=CITY.g.children[k];o.scale.y*=.55;o.position.y*=.55;}if(key==='cas'){var bb=BLD[BLD.length-1];if(bb&&bb.house){houseTier(bb);if(bb.house.bl)bldGfx(bb);}}if(key==='gym')gymTop(BLD[BLD.length-1]);if(key==='hos')hotelTop(BLD[BLD.length-1]);shopTop(BLD[BLD.length-1],key);}
 // cars
@@ -1025,7 +1069,7 @@ function showInteriorVisitors(bd){
   });
   for(var w=0;w<workers;w++){var sp=spots[idx++];if(sp)addInteriorWorker(bd,sp,w);}
 }
-function enterB(bd){sfx('door');inB=bd;buildInterior(bd);showInteriorVisitors(bd);if(bd.key==='jai')showJailDetainees();placeSim(HOME,Math.floor(HOME.w/2),HOME.h-2);heading=Math.PI;sim.rotation.set(0,heading,0);addLovePartnerInside();}
+function enterB(bd){sfx('door');inB=bd;buildInterior(bd);showInteriorVisitors(bd);if(bd.key==='jai')showJailDetainees();placeSim(HOME,Math.floor(HOME.w/2),HOME.h-2);heading=Math.PI;sim.rotation.set(0,heading,0);addLovePartnerInside();renderJobStats();}
 function addLovePartnerInside(){
   if(LOVE.interiorPartner&&LOVE.interiorPartner.parent)LOVE.interiorPartner.parent.remove(LOVE.interiorPartner);
   LOVE.interiorPartner=null;var src=LOVE.partner;if(!src||!HOME.map)return;if(LOVE.stayHome&&!(inB&&(inB.house&&inB.house.own)))return;
@@ -1142,7 +1186,7 @@ placeSim(CITY,HB.front[0]+1,HB.front[1]);
 var card=$('card'),go=$('go'),sheet=$('sheet');
 go.addEventListener('click',function(){
   if(trip)return;
-  if(cur===HOME){if(JAIL&&inB&&inB.key==='jai'){toast('Estás preso: espera o paga la fianza');return;}sfx('door');if(inB&&inB.hotel){enterB(inB.hotel);return;}var ob=inB||HB;inB=null;placeSim(CITY,ob.front[0],ob.front[1]);return;}
+  if(cur===HOME){if(JAIL&&inB&&inB.key==='jai'){toast('Estás preso: espera o paga la fianza');return;}sfx('door');if(inB&&inB.hotel){enterB(inB.hotel);return;}var ob=inB||HB;inB=null;renderJobStats();placeSim(CITY,ob.front[0],ob.front[1]);return;}
   if(!curB||act)return;var d=curB.def;if(d.rui&&!REST){buyRest();return;}if(d.orr&&!curB.farm.own){buyFarm(curB);return;}if(d.fac){if(FAC)phone('fab');else buyFac();return;}if(curB.house){houseMain(curB);return;}
   if(!d.park){enterB(curB);return;}
   if((d.cost||0)>money)return;
@@ -1150,9 +1194,9 @@ go.addEventListener('click',function(){
 });
 function openSheet(id,html){
   ['bph','bch'].forEach(function(b){$(b).classList.toggle('on',b===id);});
-  $('panel').innerHTML='<button class="x" id="cl">Cerrar</button>'+html;sheet.hidden=false;$('cl').onclick=closeSheet;
+  $('panel').innerHTML='<button class="x" id="cl">Cerrar</button>'+html;sheet.hidden=false;$('cl').onclick=closeSheet;if(id==='bph')$('cl').remove();
 }
-function closeSheet(){sheet.hidden=true;$('bph').classList.remove('on');$('bch').classList.remove('on');}
+function closeSheet(){sheet.hidden=true;document.body.classList.remove('phone-open');$('bph').classList.remove('on');$('bch').classList.remove('on');$('bph2').textContent='📱';$('bph2').setAttribute('aria-label','Abrir celular');}
 sheet.addEventListener('click',function(e){if(e.target===sheet)closeSheet();});
 $('bph').onclick=function(){openSheet('bph','<h3>Mi celular</h3><p>Saldo: <b>'+fmt(money)+' CUP</b></p><p>Trabajos (toca el lugar en el mapa):</p><ul><li>Banco Popular · +700 CUP</li><li>Oficina · +600 CUP</li><li>Taller · +500 CUP</li><li>Computadora en casa · +400 CUP</li></ul><p>Trabajar cansa. Come, duerme y date un respiro para que no bajen tus barras.</p>');};
 $('bch').onclick=function(){openSheet('bch','<h3>Chat</h3><div class="msg"><b>Yunior JR</b><br>Llegó mercancía al agropecuario 🛒</div><div class="msg"><b>Lisa1234</b><br>¿Vamos al cine esta noche?</div><div class="msg"><b>Carlito23</b><br>En el taller están pagando bien hoy 🔧</div><div class="msg"><b>Dayana_88</b><br>Nos vemos en el parque 🌴</div>');};
@@ -1300,7 +1344,7 @@ function frame(now){
   if(sig!==lastCard){lastCard=sig;card.hidden=!showCard;$('ct').textContent=ctxt;go.textContent=btxt;go.disabled=dis;$('go2').hidden=!b2;$('go2').textContent=b2;}
   // hud
   STATS.forEach(function(s){var v=Math.round(needs[s[0]]),r=sref[s[0]];if(v!==r.last){r.last=v;r.v.textContent=v+'/100';r.i.style.width=v+'%';var mini=$('nh'+s[0][0].toUpperCase()+s[0].slice(1));if(mini)mini.style.width=v+'%';}});
-  $('cash').textContent=fmt(money);if($('moneyAmount'))$('moneyAmount').textContent=fmt(money);$('sub').textContent=PV[PROV].c+' · '+job+(JAIL?' · 🔒 '+Math.max(0,Math.ceil((JAIL.until-Date.now())/1000))+' s':'');
+  $('cash').textContent=fmt(money);if($('moneyAmount'))$('moneyAmount').textContent=fmt(money);$('sub').textContent=PV[PROV].c+' · '+job+(JAIL?' · 🔒 '+Math.max(0,Math.ceil((JAIL.until-Date.now())/1000))+' s':'');renderJobStats();
   $('state').textContent=act?act.k.l:pathQ.length?'En camino':'Con normalidad';
   var mi=Math.floor(gm)%60;
   if(mi!==lastMin){
@@ -1463,7 +1507,7 @@ $('ofhost').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe u
       if(e.k==='open'){var id='L'+e.cid,h={},c={peer:id,open:true,send:function(d){OFQ.push({cid:e.cid,m:d});},on:function(k,f){h[k]=f;}};OFH[e.cid]=h;NET.conns[id]=c;hostOn(c);toast((e.name||'Un jugador')+' entró');paintMenu();}
       else if(e.k==='msg'){var h2=OFH[e.cid];if(h2&&h2.data)h2.data(e.m);}
       else if(e.k==='close'){var h3=OFH[e.cid];delete OFH[e.cid];if(h3&&h3.close)h3.close();}
-    });}).catch(function(){}).then(done);},90);
+    });}).catch(function(){if(NET.on)leave('El servidor se cerró o se perdió la conexión.');}).then(done);},90);
     ofLoop(function(done){if(OFQ.length){var b=OFQ;OFQ=[];ofPost('/r/h',{b:b}).catch(function(){}).then(done);}else done();},100);
   }).catch(function(){ofst('No se encontró el servidor. ¿Está corriendo server.py?');});};
 $('ofjoin').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe una IP válida, por ejemplo 192.168.1.5:8000.');saveName();ofst('Conectando…');
@@ -1471,7 +1515,7 @@ $('ofjoin').onclick=function(){OFB=ofBase();if(OFB===null)return ofst('Escribe u
     var cid=r.cid,c={peer:'H',open:true,send:function(d){OFQ.push(d);},on:function(){}};
     NET.peer={destroy:function(){var k=ofKill;ofPost('/r/g',{cid:cid,close:1}).catch(function(){});k();}};NET.id='L'+cid;NET.conns={H:c};NET.off=true;NET.addr='';
     netUp('OFFLINE',false);menu.hidden=false;mview='mp';paintMenu();toast('Entraste a la sala offline. Espera al segundo jugador.');
-    ofLoop(function(done){ofGet('/r/poll?c='+cid).then(function(x){(x.ev||[]).forEach(function(e){if(e.close){if(NET.on)leave('La sala se cerró');}else if(e.m)onData(e.m);});}).catch(function(){}).then(done);},90);
+    ofLoop(function(done){ofGet('/r/poll?c='+cid).then(function(x){(x.ev||[]).forEach(function(e){if(e.close){if(NET.on)leave('La sala se cerró');}else if(e.m)onData(e.m);});}).catch(function(){if(NET.on)leave('El servidor se cerró o se perdió la conexión.');}).then(done);},90);
     ofLoop(function(done){var q=OFQ;OFQ=[];q.forEach(function(m){ofPost('/r/g',{cid:cid,m:m}).catch(function(){});});done();},120);
   }).catch(function(){ofst('No se encontró el servidor. ¿Misma WiFi y server.py abierto?');});};
 $('mhost').onclick=createRoom;
@@ -1637,9 +1681,57 @@ function drawMiniMap(){
 }
 setInterval(drawMiniMap,250);
 function phone(a){
-  PH=a||null;
+  document.body.classList.add('phone-open');$('bph2').textContent='✕';$('bph2').setAttribute('aria-label','Cerrar celular');PH=a||null;
   if(a==='cht'){$('bch').onclick();return;}
   openSheet('bph',a?page(a):'<h3>📱 Mi celular</h3><p>'+fmt(money)+' CUP · '+PV[PROV].c+'</p><div class="apps">'+APPS.map(function(x){return '<button data-app="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+'</button>';}).join('')+'</div>');
+  var panel=$('panel');
+  // Reordenar apps: mantener pulsada una app y soltarla encima de otra.
+  var grid=panel.querySelector('.apps');
+  if(grid){
+    try{var order=JSON.parse(localStorage.getItem('simsPhoneAppsOrder')||'null');if(Array.isArray(order)){order.forEach(function(key){var b=Array.from(grid.children).find(function(el){return el.dataset.app===key;});if(b)grid.appendChild(b);});}}catch(_){}
+    var hold=null,drag=null,origin=null,target=null,moved=false,suppress=false;
+    grid.addEventListener('pointerdown',function(e){var b=e.target.closest('button[data-app]');if(!b)return;hold={button:b,x:e.clientX,y:e.clientY,id:e.pointerId};moved=false;var timer=setTimeout(function(){if(!hold||hold.button!==b)return;drag=b;origin=Array.from(grid.children);b.classList.add('app-lift');try{b.setPointerCapture(e.pointerId)}catch(_){};},320);hold.timer=timer;});
+    grid.addEventListener('pointermove',function(e){if(!hold||hold.id!==e.pointerId)return;if(!drag){if(Math.hypot(e.clientX-hold.x,e.clientY-hold.y)>12){clearTimeout(hold.timer);hold=null;}return;}e.preventDefault();moved=true;var el=document.elementFromPoint(e.clientX,e.clientY),b=el&&el.closest('button[data-app]');grid.querySelectorAll('.app-target').forEach(function(x){x.classList.remove('app-target')});target=(b&&b!==drag)?b:null;if(target)target.classList.add('app-target');});
+    function finish(e){
+      if(!hold||hold.id!==e.pointerId)return;
+      clearTimeout(hold.timer);
+      if(drag){
+        var all=Array.from(grid.children),from=all.indexOf(drag),to=target?all.indexOf(target):-1;
+        if(to>=0&&from!==to){
+          var before=all.map(function(el){return el.getBoundingClientRect();});
+          var other=all[to];
+          if(from<to)grid.insertBefore(other,drag);else grid.insertBefore(drag,other);
+          var after=Array.from(grid.children);
+          after.forEach(function(el){
+            var old=before[all.indexOf(el)],now=el.getBoundingClientRect(),dx=old.left-now.left,dy=old.top-now.top;
+            if(dx||dy){el.style.transition='none';el.style.transform='translate('+dx+'px,'+dy+'px)';requestAnimationFrame(function(){el.style.transition='';el.style.transform='';el.classList.add('app-settle');setTimeout(function(){el.classList.remove('app-settle');},300);});}
+          });
+          try{localStorage.setItem('simsPhoneAppsOrder',JSON.stringify(after.map(function(el){return el.dataset.app;})));}catch(_){}
+          suppress=true;setTimeout(function(){suppress=false;},450);
+        }
+        grid.querySelectorAll('.app-lift,.app-target').forEach(function(x){x.classList.remove('app-lift','app-target');});
+        drag=null;target=null;origin=null;
+      }
+      hold=null;
+    }
+    grid.addEventListener('pointerup',finish);grid.addEventListener('pointercancel',finish);
+    grid.addEventListener('click',function(e){if(suppress){e.preventDefault();e.stopPropagation();suppress=false;}},true);
+  }
+  // Recupera la última posición del teléfono para mantenerla entre partidas.
+  try{var saved=JSON.parse(localStorage.getItem('simsPhonePosition')||'null');if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)){panel.style.left=Math.max(4,Math.min(innerWidth-panel.offsetWidth-4,saved.x))+'px';panel.style.top=Math.max(4,Math.min(innerHeight-panel.offsetHeight-4,saved.y))+'px';panel.style.right='auto';panel.style.bottom='auto';}}catch(e){}
+  // La isla dinámica blanca es la única zona para mover el teléfono.
+  var island=document.createElement('div');island.id='phone-drag-island';island.setAttribute('aria-label','Mantener y arrastrar para mover el teléfono');island.title='Mantén presionado para mover el teléfono';panel.appendChild(island);
+  var phoneHold=null,phoneDragReady=false;
+  island.addEventListener('pointerdown',function(e){
+    e.preventDefault();e.stopPropagation();
+    phoneHold={id:e.pointerId,x:e.clientX,y:e.clientY,left:panel.getBoundingClientRect().left,top:panel.getBoundingClientRect().top};
+    phoneDragReady=false;
+    phoneHold.timer=setTimeout(function(){if(phoneHold&&phoneHold.id===e.pointerId){phoneDragReady=true;panel.classList.add('phone-moving');try{island.setPointerCapture(e.pointerId)}catch(_){}}},220);
+  });
+  island.addEventListener('pointermove',function(e){if(!phoneHold||phoneHold.id!==e.pointerId)return;if(!phoneDragReady)return;e.preventDefault();var L=Math.max(4,Math.min(innerWidth-panel.offsetWidth-4,phoneHold.left+e.clientX-phoneHold.x));var T=Math.max(4,Math.min(innerHeight-panel.offsetHeight-4,phoneHold.top+e.clientY-phoneHold.y));panel.style.left=L+'px';panel.style.top=T+'px';panel.style.right='auto';panel.style.bottom='auto';});
+  function stopPhoneMove(e){if(!phoneHold||phoneHold.id!==e.pointerId)return;clearTimeout(phoneHold.timer);if(phoneDragReady){try{localStorage.setItem('simsPhonePosition',JSON.stringify({x:panel.getBoundingClientRect().left,y:panel.getBoundingClientRect().top}));}catch(_){}}phoneHold=null;phoneDragReady=false;panel.classList.remove('phone-moving');}
+  island.addEventListener('pointerup',stopPhoneMove);island.addEventListener('pointercancel',stopPhoneMove);
+  ['n','s','e','w','ne','nw','se','sw'].forEach(function(edge){var h=document.createElement('div');h.className='phone-resize '+edge;h.setAttribute('aria-label','Cambiar tamaño');panel.appendChild(h);h.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);var r=panel.getBoundingClientRect(),sx=e.clientX,sy=e.clientY,sl=r.left,st=r.top,sw=r.width,sh=r.height;function move(ev){var dx=ev.clientX-sx,dy=ev.clientY-sy,L=sl,T=st,W=sw,H=sh;if(edge.indexOf('e')>=0)W=sw+dx;if(edge.indexOf('s')>=0)H=sh+dy;if(edge.indexOf('w')>=0){W=sw-dx;L=sl+dx;}if(edge.indexOf('n')>=0){H=sh-dy;T=st+dy;}W=Math.max(110,Math.min(innerWidth-8,W));H=Math.max(130,Math.min(innerHeight-8,H));L=Math.max(4,Math.min(innerWidth-W-4,L));T=Math.max(4,Math.min(innerHeight-H-4,T));panel.style.left=L+'px';panel.style.top=T+'px';panel.style.right='auto';panel.style.bottom='auto';panel.style.width=W+'px';panel.style.height=H+'px';panel.style.maxWidth='none';panel.style.maxHeight='none';}function up(){h.removeEventListener('pointermove',move);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);}h.addEventListener('pointermove',move);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);});});
 }
 function arrive(i){enterWorld(i);sfx('chime');toast('✈️ Llegaste a '+PV[i].c);}
 function startTrip(i){
@@ -1694,7 +1786,7 @@ $('panel').addEventListener('click',function(e){
   else if(d.do==='veh'){var k=+d.v;if(!owned[k]){if(money<VEH[k][2]){toast('No te alcanza el dinero');return;}money-=VEH[k][2];owned[k]=1;}vi=k;setVehOn(sim,k);simLab.el.textContent=VEH[k][3]+myName;toast('Ahora: '+VEH[k][0]);phone('veh');}
   else if(d.do==='trv')startTrip(+d.v);
 });
-function phTog(){if(!sheet.hidden&&$('bph').classList.contains('on'))closeSheet();else phone();}
+function phTog(){sfx('click');if(!sheet.hidden&&$('bph').classList.contains('on'))closeSheet();else phone();}
 $('bph').onclick=phTog;$('bph2').onclick=phTog;
 
 // ---------- trabajo: pago por horario, ascensos, mipymes y fábrica ----------
@@ -1708,6 +1800,7 @@ function ask(it){
 }
 function shiftDone(j){sfx('coin');var o=rankOf(j);WK[j]=(WK[j]||0)+1;var n=rankOf(j);if(n>o)setTimeout(function(){toast('🎉 Ascenso a '+RANKS[n][0]+' en '+j+': mejor salario');},1600);}
 function rkHTML(){var k=Object.keys(WK);return k.length?'<p><b>Rangos</b><br>'+k.map(function(j){return j+': '+RANKS[rankOf(j)][0]+' ('+WK[j]+' turnos)';}).join('<br>')+'</p>':'';}
+function renderJobStats(){var el=$('jobStatsHud');if(!el)return;var d=(cur===HOME&&inB&&inB.def)?inB.def:null;if(!d||!d.pay||!d.job){el.classList.remove('active');el.innerHTML='';return;}var j=d.job,r=rankOf(j),nx=RANKS[r+1],done=WK[j]||0,pay=payFor(d),need=nx?Math.max(0,nx[1]-done):0,progress=nx?Math.min(100,Math.round((done-(RANKS[r][1]||0))/(nx[1]-(RANKS[r][1]||0))*100)):100;el.innerHTML='<div class=\"jsh\">'+(d.e||'💼')+' Estadísticas · '+j+'</div><div class=\"jsrow\"><span>💵 Pago por turno</span><b>'+fmt(pay)+' CUP</b></div><div class=\"jsrow\"><span>Salario base</span><b>'+fmt(d.pay)+' CUP</b></div><div class=\"jsrow\"><span>Horario actual</span><b>'+shiftNow()[0]+' (×'+shiftNow()[1]+')</b></div><div class=\"jsrow\"><span>Rango</span><b>'+RANKS[r][0]+'</b></div><div class=\"jsrow\"><span>Turnos completados</span><b>'+done+'</b></div>'+(nx?'<div class=\"jsrow\"><span>Próximo ascenso</span><b>'+nx[0]+'</b></div><div class=\"jsbar\"><i style=\"width:'+progress+'%\"></i></div><div class=\"muted\">Faltan '+need+' turnos para aumentar el salario.</div>':'<div class=\"muted\">🏆 Has alcanzado el rango máximo.</div>');el.classList.add('active');}
 var FAC=null,CATS=[['Dulces','🍰',35],['Herramientas','🔩',55],['Ropa','👕',45]],LOGOS=['🏭','🏗️','⚙️','🏢','🧪','🎨'],QM=[1,1.4,2],RATE=[20,45,90],CAPS=[60,150,300],UPC=[3000,7000],MP=['mp1','mp2','mp3'];
 function fstock(){var n=Date.now();if(!blackout)FAC.stock=Math.min(CAPS[FAC.c-1],FAC.stock+(n-FAC.last)/60000*RATE[FAC.c-1]);FAC.last=n;return Math.floor(FAC.stock);}
 function uprice(mi){return Math.round(CATS[FAC.cat][2]*QM[FAC.q-1]*(mi===FAC.cat?1:.6)*(.85+((new Date().getMinutes()+mi*7)%30)/100));}
