@@ -1283,10 +1283,10 @@ function mkRemote(id,d){
   var l=addLabel(d.n||'Jugador','',new THREE.Vector3(),null);l.follow=g;
   RM[id]={g:g,l:l,x:0,z:0,r:0,city:false,vis:false,t:0,wk:false};
 }
-function dropRemote(id){var r=RM[id];if(!r)return;scene.remove(r.g);if(r.pet)scene.remove(r.pet);r.l.el.remove();var i=LABS.indexOf(r.l);if(i>=0)LABS.splice(i,1);delete RM[id];if(NET.on)toast('Un jugador salió');paintMenu();}
+function dropRemote(id){var r=RM[id];if(!r)return;scene.remove(r.g);if(r.pet)scene.remove(r.pet);if(r.partner&&r.partner.parent)r.partner.parent.remove(r.partner);r.l.el.remove();var i=LABS.indexOf(r.l);if(i>=0)LABS.splice(i,1);delete RM[id];if(NET.on)toast('Un jugador salió');paintMenu();}
 function addChat(n,x){CHL.push([n,x]);if(CHL.length>40)CHL.shift();var lg=$('clog');if(lg&&!sheet.hidden){var m=document.createElement('div');m.className='msg';m.innerHTML='<b></b><br><span></span>';m.firstChild.textContent=n;m.lastChild.textContent=x;lg.appendChild(m);lg.scrollTop=1e6;}else toast(n+': '+x);}
 function onData(d,from){
-  if(d.t==='p'){if(!RM[d.f]){mkRemote(d.f,d);paintMenu();}var r=RM[d.f];var lt=d.n+(d.l?' 🥷 Ladrón':'');if(r.l.el.textContent!==lt)r.l.el.textContent=lt;if(d.a){r.a=d.a;dress(r.g,d.a);}r.x=d.x;r.z=d.z;r.r=d.r;r.city=!!d.m;r.wk=!!d.w;r.pv=d.v;r.vh=d.h|0;r.q=d.q||'';}
+  if(d.t==='p'){if(!RM[d.f]){mkRemote(d.f,d);paintMenu();}var r=RM[d.f];var lt=d.n+(d.l?' 🥷 Ladrón':'');if(r.l.el.textContent!==lt)r.l.el.textContent=lt;if(d.a){r.a=d.a;dress(r.g,d.a);}r.x=d.x;r.z=d.z;r.r=d.r;r.city=!!d.m;r.inside=!!d.inside;r.bk=d.bk||'';r.bi=d.bi||'';r.wk=!!d.w;r.pv=d.v;r.vh=d.h|0;r.boat=!!d.boat;r.ride=!!d.ride;r.q=d.q||'';r.lp=!!d.lp;r.lpn=d.lpn||'Pareja';r.lpr=!!d.lpr;r.lps=!!d.lps;r.lpm=d.lpm||'follow';}
   else if(d.t==='c')addChat(d.n,d.x);
   else if(d.t==='x')dropRemote(d.f);else if(d.t==='s'&&d.to===NET.id)onSteal(d);else if(d.t==='r'&&d.to===NET.id)onStealRes(d);
 }
@@ -1348,20 +1348,29 @@ $('bch').onclick=function(){
 setInterval(function(){
   if(!NET.on)return;
   var mv=Math.hypot(sim.position.x-lx,sim.position.z-lz)>.02;lx=sim.position.x;lz=sim.position.z;
-  send({t:'p',n:myName,c:myCol,x:+sim.position.x.toFixed(2),z:+sim.position.z.toFixed(2),r:+sim.rotation.y.toFixed(2),m:cur===CITY?1:0,w:mv?1:0,v:PROV,h:vi,q:act?akind(act.k):'',l:TAG>Date.now()?1:0,a:(apT++%10===0)?{p:PET.act,m:PET.mode,k:{shirt:LOOK.shirt,pants:LOOK.pants,hair:LOOK.hair,shoes:LOOK.shoes,skin:LOOK.skin,hs:LOOK.hs,sz:LOOK.sz},e:CL.eq}:undefined});
+  send({t:'p',n:myName,c:myCol,x:+sim.position.x.toFixed(2),z:+sim.position.z.toFixed(2),r:+sim.rotation.y.toFixed(2),m:cur===CITY?1:0,w:mv?1:0,v:PROV,h:vi,q:act?akind(act.k):'',l:TAG>Date.now()?1:0,
+    inside:cur===HOME&&!!inB,bk:inB?(inB.key||inB.def.n):'',bi:inB?(inB.gx+','+inB.gz):'',boat:!!BOAT,ride:!!(UBER&&UBER.ph==='ride'),lp:!!(LOVE&&LOVE.partner&&!LOVE.stayHome),lpn:LOVE&&LOVE.partner?(LOVE.partner.userData.name||'Pareja'):'',lpr:!!(LOVE&&LOVE.married),lps:!!(LOVE&&LOVE.stayHome),lpm:LOVE&&LOVE.stayHome?'home':'follow',
+    a:(apT++%5===0)?{p:PET.act,m:PET.mode,n:PET.name,k:{shirt:LOOK.shirt,pants:LOOK.pants,hair:LOOK.hair,shoes:LOOK.shoes,skin:LOOK.skin,hs:LOOK.hs,sz:LOOK.sz},e:CL.eq}:undefined});
 },120);
 (function rloop(now){
   vehVis(sim,cur===CITY);var near=null;
   Object.keys(RM).forEach(function(k){
-    var r=RM[k],g=r.g,v=r.city&&cur===CITY&&r.pv===PROV;if((g.userData.vh|0)!==(r.vh|0))setVehOn(g,r.vh|0);vehVis(g,v);
+    var r=RM[k],g=r.g,cityView=r.city&&cur===CITY&&r.pv===PROV;
+    var roomKey=inB?(inB.key||inB.def.n):'',roomView=!!(r.inside&&cur===HOME&&inB&&r.pv===PROV&&r.bk===roomKey&&r.bi===(inB.gx+','+inB.gz));
+    var v=cityView||roomView;
+    if((g.userData.vh|0)!==(r.vh|0))setVehOn(g,r.vh|0);vehVis(g,cityView);
+    var parent=roomView?HOME.g:scene;
+    if(g.parent!==parent){if(g.parent)g.parent.remove(g);parent.add(g);g.position.set(r.x,baseY(),r.z);}
     if(v){
-      if(!r.vis){g.position.set(r.x,baseY(),r.z);}
+      if(!r.vis)g.position.set(r.x,baseY(),r.z);
       var dx=r.x-g.position.x,dz=r.z-g.position.z;
       g.position.x+=dx*.25;g.position.z+=dz*.25;g.position.y=baseY();
       var da=Math.atan2(Math.sin(r.r-g.rotation.y),Math.cos(r.r-g.rotation.y));g.rotation.y+=da*.3;
       r.t+=.16;swing(g,r.t,r.wk&&!r.q);if(r.q)animP(g,r.q,r.t/9.6);
     }else g.position.y=-100;
-    g.visible=v&&!pvw;r.vis=v;remPet(r,v);if(v&&!near&&Math.hypot(g.position.x-sim.position.x,g.position.z-sim.position.z)<2.5)near=k;
+    g.visible=v&&!pvw;r.vis=v;remPet(r,v);
+    if(r.lp&&v){if(!r.partner){r.partner=person(0xe8a0b0,0x3a2a1e,.68);scene.add(r.partner);}var rp=r.partner;var rx=g.position.x-Math.sin(g.rotation.y)*.95,rz=g.position.z-Math.cos(g.rotation.y)*.95;if(rp.parent!==parent){if(rp.parent)rp.parent.remove(rp);parent.add(rp);}rp.visible=!pvw&&!r.ride&&!r.boat;rp.position.x+=(rx-rp.position.x)*.22;rp.position.z+=(rz-rp.position.z)*.22;rp.position.y=baseY();rp.rotation.y=g.rotation.y;swing(rp,r.t+1,r.wk&&!r.q);if(r.q)animP(rp,r.q,r.t/9.6);}else if(r.partner)r.partner.visible=false;
+    if(r.pet&&roomView){if(r.pet.parent!==HOME.g){if(r.pet.parent)r.pet.parent.remove(r.pet);HOME.g.add(r.pet);}r.pet.visible=v&&!pvw;}else if(r.pet&&r.pet.parent!==scene){if(r.pet.parent)r.pet.parent.remove(r.pet);scene.add(r.pet);}if(v&&!near&&cityView&&Math.hypot(g.position.x-sim.position.x,g.position.z-sim.position.z)<2.5)near=k;
   });
   NEAR=near;if(bst)bst.style.display=near&&!act&&!JAIL&&!SP?'':'none';requestAnimationFrame(rloop);
 })();
@@ -2238,7 +2247,8 @@ function dress(g,a){var k=a.k;if(!k)return;g.traverse(function(o){var q=o.userDa
 function remPet(r,v){
   var a=r.a;if(!(v&&a&&a.p>=0&&a.m==='follow')){if(r.pet)r.pet.visible=false;return;}
   var g=r.g;if(r.pk!==a.p){if(r.pet)scene.remove(r.pet);r.pet=petMesh(a.p);r.pk=a.p;scene.add(r.pet);r.pet.position.copy(g.position);}
-  var p=r.pet,tx=g.position.x-Math.sin(g.rotation.y)*.7,tz=g.position.z-Math.cos(g.rotation.y)*.7,dx=tx-p.position.x,dz=tz-p.position.z,mv=Math.hypot(dx,dz)>.12;
+  var p=r.pet;if(g.parent&&p.parent!==g.parent){if(p.parent)p.parent.remove(p);g.parent.add(p);p.position.copy(g.position);}
+  var tx=g.position.x-Math.sin(g.rotation.y)*.7,tz=g.position.z-Math.cos(g.rotation.y)*.7,dx=tx-p.position.x,dz=tz-p.position.z,mv=Math.hypot(dx,dz)>.12;
   p.visible=!pvw;p.position.x+=dx*.12;p.position.z+=dz*.12;p.position.y=baseY()+.02;if(mv)p.rotation.y=Math.atan2(dx,dz);
   r.pw=(r.pw||0)+(mv?.25:0);var lg=p.userData.legs,s=mv?Math.sin(r.pw*3)*.7:0;if(lg.length){lg[0].rotation.x=lg[3].rotation.x=s;lg[1].rotation.x=lg[2].rotation.x=-s;}
 }
