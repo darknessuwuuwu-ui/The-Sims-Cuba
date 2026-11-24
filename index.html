@@ -3582,8 +3582,8 @@ setInterval(function(){
 // ----- guardado automático y botón de empezar de nuevo -----
 function saveGame(){if(RESET||!menu||!menu.hidden)return;try{
  ACTIVE_SLOT=Math.max(1,Math.min(3,parseInt(ACTIVE_SLOT,10)||1));SK='casita.save2.slot'+ACTIVE_SLOT;
- var bm=money,bo=owned,bc=CL,bp=PET;
- if(IS_ADMIN&&ADMIN_BACKUP){bm=ADMIN_BACKUP.money;bo=ADMIN_BACKUP.owned;bc={own:adminClone(ADMIN_BACKUP.clOwn),eq:adminClone(CL.eq)};bp=adminClone(PET);bp.own=adminClone(ADMIN_BACKUP.petOwn);bp.act=ADMIN_BACKUP.petAct;}
+ var bm=money,bo=owned,bc=CL,bp=PET,bHOUSES=HOUSES,bSTAY=STAY,bFAC=FAC_BY_PROV,bWH=WH_BY_PROV,bFARMS=FARMS,bREST=REST,bGYM=GYM;
+ if(IS_ADMIN&&ADMIN_BACKUP){bm=ADMIN_BACKUP.money;bo=ADMIN_BACKUP.owned;bc={own:adminClone(ADMIN_BACKUP.clOwn),eq:adminClone(CL.eq)};bp=adminClone(PET);bp.own=adminClone(ADMIN_BACKUP.petOwn);bp.act=ADMIN_BACKUP.petAct;bHOUSES=ADMIN_BACKUP.HOUSES;bSTAY=ADMIN_BACKUP.STAY;bFAC=ADMIN_BACKUP.FAC_BY_PROV;bWH=ADMIN_BACKUP.WH_BY_PROV;bFARMS=ADMIN_BACKUP.FARMS;bREST=ADMIN_BACKUP.REST;bGYM=ADMIN_BACKUP.GYM;}
  // Guardar el lugar exacto: calle o interior del edificio donde quedó esta partida.
  var playerState={mode:cur===HOME?'interior':'city',x:sim.position.x,y:sim.position.y,z:sim.position.z,rot:sim.rotation.y};
  if(cur===HOME&&inB){var resumeRef=(inB.key==='room'&&inB.hotel)?inB.hotel:inB;playerState.buildingKey=resumeRef.key||inB.key||'room';playerState.buildingX=resumeRef.x;playerState.buildingZ=resumeRef.z;playerState.buildingName=inB.def&&inB.def.n||'';if(inB.key==='room')playerState.roomIndex=RN.indexOf(String(inB.def.n||'').replace('Habitación ',''));}
