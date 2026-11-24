@@ -3590,7 +3590,8 @@ function saveGame(){if(RESET||!menu||!menu.hidden)return;try{
  localStorage.setItem(SK,JSON.stringify({v:1,money:bm,needs:needs,job:job,WK:WK,owned:bo,vi:(HWPREV!==null?HWPREV:vi),myCol:myCol,PROV:PROV,HOUSES:bHOUSES,STAY:bSTAY,FAC:FAC,FAC_BY_PROV:bFAC,WH_BY_PROV:bWH,CL:bc,FARMS:bFARMS,LOOK:LOOK,muted:muted,PET:bp,REST:bREST,GYM:bGYM,JAIL:JAIL,TAG:TAG,REC:REC,playerPos:cur===CITY?{x:sim.position.x,y:sim.position.y,z:sim.position.z,rot:sim.rotation.y}:null,playerState:playerState,gameMinutes:gm}));
  var si=$('saveIndicator');if(!si){si=document.createElement('div');si.id='saveIndicator';si.textContent='💾';si.style.cssText='position:absolute;right:2px;top:-19px;z-index:99999;padding:0;background:transparent;border:0;color:white;font:14px sans-serif;line-height:16px;opacity:0;transition:opacity .2s;pointer-events:none';var nh=$('needsHud');(nh||document.body).appendChild(si);}si.textContent='💾';si.style.opacity='1';clearTimeout(window._saveIndTimer);window._saveIndTimer=setTimeout(function(){si.style.opacity='0';},1100);
  }catch(e){if(!window._saveErrShown){window._saveErrShown=true;console.error('Error al guardar la partida:',e);toast('⚠️ No se pudo guardar. Comprueba el espacio del navegador.');}}}
-setInterval(function(){if(!routeExitLocked())saveGame();},3000);
+// Guardado automático restaurado: guarda cada 3 segundos en el espacio activo, incluso durante recorridos.
+setInterval(function(){if(menu&&menu.hidden)saveGame();},3000);
 window.addEventListener('beforeunload',function(e){if(routeExitLocked()){e.preventDefault();e.returnValue='El recorrido todavía no ha terminado.';return e.returnValue;}});
 window.addEventListener('pagehide',function(){if(menu&&menu.hidden&&!routeExitLocked())saveGame();});
 document.addEventListener('visibilitychange',function(){if(document.hidden&&menu&&menu.hidden&&!routeExitLocked())saveGame();});
