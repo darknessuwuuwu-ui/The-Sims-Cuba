@@ -3927,6 +3927,198 @@ function animateFactoryInterior(dt){
 }
 (function factoryVisualLoop(last){function tick(now){var dt=Math.min(.05,((now-last)||16)/1000);last=now;animateFactoryInterior(dt);requestAnimationFrame(tick);}requestAnimationFrame(tick);})(performance.now());
 
+
+// ===== Deliveri (app del celular) + Inventario (botón 🎒) =====
+(function(){
+var INV={items:[]},DLV={done:0,earned:0,cur:null,offers:[],n:0},INVTAB='obj';
+var SECN={pedidos:'📦 Pedidos de Deliveri',comida:'🍽️ Comida y bebida',otros:'🧰 Otros'};
+var st=document.createElement('style');st.textContent=
+'#binv{position:absolute;z-index:7;top:auto;right:auto;bottom:max(12px,env(safe-area-inset-bottom,0px));left:max(154px,calc(env(safe-area-inset-left,0px) + 154px));width:42px;height:42px;border-radius:13px;border:1px solid #243170;background:rgba(15,26,68,.92);color:#fff;font-size:22px;cursor:pointer}'+
+'@media(max-width:600px){#binv{bottom:max(14px,env(safe-area-inset-bottom,0px));width:40px;height:40px}}'+
+'body:has(#menu:not([hidden])) #binv,body:has(#sheet:not([hidden])) #binv,body.pvw #binv,body:has(#menu:not([hidden])) #dlvHud,body:has(#menu:not([hidden])) #dlvGive{visibility:hidden!important;pointer-events:none!important}'+
+'#dlvHud{position:absolute;top:68px;left:10px;z-index:12;max-width:min(260px,calc(100% - 20px));padding:6px 9px;border-radius:9px;background:rgba(0,0,0,.72);border:1px solid rgba(255,210,74,.55);color:#fff;font:700 12px/1.35 sans-serif;pointer-events:none;display:none}'+
+'#dlvGive{position:absolute;left:50%;bottom:128px;transform:translateX(-50%);z-index:30;padding:12px 18px;border-radius:14px;border:0;background:#1fa35c;color:#fff;font-size:15px;font-weight:800;box-shadow:0 4px 14px #0008;display:none;cursor:pointer}';
+document.head.appendChild(st);
+var stage=$('stage'),hud=document.createElement('div'),give=document.createElement('button'),bi=document.createElement('button');
+hud.id='dlvHud';give.id='dlvGive';bi.id='binv';bi.textContent='🎒';bi.setAttribute('aria-label','Inventario');
+stage.appendChild(hud);stage.appendChild(give);stage.appendChild(bi);
+
+function mmss(s){s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
+function r10(n){return Math.round(n/10)*10;}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+// ---------- inventario ----------
+function invAdd(it){var f=null;INV.items.forEach(function(q){if(q.id===it.id)f=q;});if(f)f.q+=it.q||1;else{it.q=it.q||1;INV.items.push(it);}}
+function invTake(id,n){for(var i=0;i<INV.items.length;i++){if(INV.items[i].id===id){INV.items[i].q-=n||1;if(INV.items[i].q<=0)INV.items.splice(i,1);return;}}}
+window.invAdd=invAdd;
+function invHTML(){
+  var tab=function(k,t){return '<button class="go" data-do="itab" data-v="'+k+'" style="margin-right:6px;'+(INVTAB===k?'':'background:#243170')+'">'+t+'</button>';};
+  var h='<h3>🎒 Inventario</h3><p>Saldo: <b>'+fmt(money)+' CUP</b></p><div>'+tab('obj','📦 Objetos')+tab('clo','🧥 Ropa')+'</div>';
+  if(INVTAB==='clo'){
+    var any=false;
+    Object.keys(SLOTN).forEach(function(s){
+      var rows=CLO.filter(function(c){return c[0]===s&&CL.own[c[1]];});if(!rows.length)return;any=true;
+      h+='<p><b>'+SLOTN[s]+'</b></p>'+rows.map(function(c){var eq=CL.eq[s]===c[1];
+        return '<div class="msg">'+c[2]+' <b>'+c[3]+'</b><br><button class="go" data-do="icl" data-v="'+c[1]+'">'+(eq?'Quitar':'Ponerme')+'</button></div>';}).join('');
+    });
+    if(!any)h+='<p>Aún no tienes ropa. Cómprala en una tienda de ropa.</p>';
+    return h;
+  }
+  var cats=['pedidos','comida','otros'],empty=true;
+  cats.forEach(function(c){
+    var rows=INV.items.filter(function(i){return (i.cat||'otros')===c;});if(!rows.length)return;empty=false;
+    h+='<p><b>'+SECN[c]+'</b></p>'+rows.map(function(i){
+      var fx=i.eff?' <small>'+Object.keys(i.eff).map(function(q){return EFN[q]+(i.eff[q]>0?'+':'')+i.eff[q];}).join(' ')+'</small>':'';
+      return '<div class="msg">'+i.e+' <b>'+esc(i.n)+'</b>'+(i.q>1?' ×'+i.q:'')+fx+(i.note?'<br><small>'+esc(i.note)+'</small>':'')+(i.eff?'<br><button class="go" data-do="iuse" data-v="'+i.id+'">Usar</button>':'')+'</div>';}).join('');
+  });
+  if(empty)h+='<p>Tu inventario está vacío. Lo que compres en tiendas y los pedidos de Deliveri aparecen aquí.</p>';
+  return h;
+}
+function invOpen(){openSheet('inv',invHTML());}
+bi.onclick=invOpen;
+
+// comprar comida -> va al inventario
+$('panel').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b||b.dataset.do!=='mbuy')return;
+  e.stopImmediatePropagation();
+  var q=b.dataset.v.split(':'),it=MENUS[q[0]][1][+q[1]];
+  if(money<it[2]){toast('No te alcanza el dinero');return;}
+  money-=it[2];sfx('coin');
+  invAdd({id:'f:'+q[0]+':'+q[1],e:it[0],n:it[1],cat:'comida',q:1,eff:it[3],dur:it[4]});
+  toast('🎒 '+it[1]+' guardado en el inventario');openMenu(q[0]);
+},true);
+
+// ---------- Deliveri ----------
+function dlvRef(){
+  if(cur===CITY)return{x:sim.position.x,z:sim.position.z};
+  var ob=inB||HB;if(ob&&ob.front)return{x:cx(CITY,ob.front[0]),z:cz(CITY,ob.front[1])};return{x:0,z:0};
+}
+function dlvPz(){var r=dlvRef(),best=null,bd=1e9;BLD.forEach(function(b){if(b.key!=='pz')return;var d=Math.hypot(b.x-r.x,b.z-r.z);if(d<bd){bd=d;best=b;}});return best;}
+function dlvGen(){
+  var pz=dlvPz();if(!pz||!CITY||!CITY.map)return;
+  var r=dlvRef(),M=MENUS.pz[1],sp=3.4*((VEH[vi]&&VEH[vi][1])||1),tries=0;
+  while(DLV.offers.length<3&&tries++<12){
+    var rc=null,k;
+    for(k=0;k<120&&!rc;k++){
+      var x=Math.floor(pz.front[0]+rnd(-42,42)),z=Math.floor(pz.front[1]+rnd(-30,30));
+      if(x<1||z<1||x>=CITY.w-1||z>=CITY.h-1||CITY.map[z][x]!=='.')continue;
+      var dd=Math.hypot(x-pz.front[0],z-pz.front[1]);if(dd<10||dd>46)continue;
+      if(DLV.offers.some(function(q){return Math.hypot(q.rc[0]-x,q.rc[1]-z)<8;}))continue;
+      rc=[x,z];
+    }
+    if(!rc)continue;
+    var idx=[0,1,2,3].sort(function(){return Math.random()-.5;}).slice(0,1+Math.floor(rnd(0,2))),foods=[],cost=0;
+    idx.forEach(function(i){var qt=1+Math.floor(rnd(0,3));foods.push([M[i][0],M[i][1],qt]);cost+=M[i][2]*qt;});
+    var nm=NAMES[Math.floor(rnd(0,NAMES.length))];
+    if(DLV.offers.some(function(q){return q.name===nm;})||(DLV.cur&&DLV.cur.name===nm))continue;
+    var wx=cx(CITY,rc[0]),wz=cz(CITY,rc[1]),d1=Math.hypot(pz.x-r.x,pz.z-r.z),d2=Math.hypot(wx-pz.x,wz-pz.z);
+    var limit=Math.round(clamp(((d1+d2)*1.5/sp+30)*rnd(.95,1.5),60,900)),tipBase=Math.round(60+d2*6);
+    DLV.offers.push({id:++DLV.n,name:nm,foods:foods,cost:cost,rc:rc,d2:d2,limit:limit,tipBase:tipBase,
+      shirt:NPC_SHIRTS[Math.floor(rnd(0,NPC_SHIRTS.length))],hair:NPC_HAIR[Math.floor(rnd(0,NPC_HAIR.length))]});
+  }
+}
+function foodTxt(o){return o.foods.map(function(f){return f[2]+'× '+f[0]+' '+f[1];}).join(' + ');}
+function dlvHTML(){
+  var bk='<button class="bk" data-app="">‹ Atrás</button>',h=bk+'<h3>🛵 Deliveri</h3><p>Entregas: <b>'+DLV.done+'</b> · Propinas: <b>'+fmt(DLV.earned)+' CUP</b></p>',o=DLV.cur;
+  if(o){
+    return h+'<div class="msg"><b>📦 Encargo activo</b><br>Cliente: <b>'+esc(o.name)+'</b><br>'+foodTxt(o)+'<br>⏱ Te quedan <b>'+mmss(o.left)+'</b><br>'+
+      (o.st==='buy'?'Paso: ve a la pizzería y compra el pedido en el mostrador ('+fmt(o.cost)+' CUP).':'Paso: lleva el pedido al cliente (mira tu HUD).')+
+      '<br><button class="go" data-do="dlvcancel">Cancelar encargo</button></div>';
+  }
+  if(!dlvPz())return h+'<p>No hay pizzería en esta provincia. Viaja a otra para trabajar.</p>';
+  if(!DLV.offers.length)dlvGen();
+  h+='<p>Elige un encargo. Pagas el pedido en la pizzería y el cliente te lo reembolsa más una propina: <b>cuanto más rápido, más propina</b>.</p>';
+  h+=DLV.offers.map(function(o){
+    return '<div class="msg"><b>👤 '+esc(o.name)+'</b><br>'+foodTxt(o)+'<br>Pedido: '+fmt(o.cost)+' CUP · Distancia ~'+Math.round(o.d2)+' m<br>⏱ Límite: <b>'+mmss(o.limit)+'</b> · Cobras hasta <b>'+fmt(o.cost+r10(o.tipBase*1.8))+' CUP</b><br><button class="go" data-do="dlvacc" data-v="'+o.id+'">Aceptar</button></div>';}).join('');
+  return h+'<button class="go" data-do="dlvnew">🔄 Nuevos pedidos</button>';
+}
+APPS.push(['dlv','🛵','Deliveri']);
+var _pg=page;page=function(a){return a==='dlv'?dlvHTML():_pg(a);};
+
+function dlvClear(){var o=DLV.cur;if(!o)return;invTake(o.itemId,1);if(o.npc&&o.npc.parent)o.npc.parent.remove(o.npc);DLV.cur=null;}
+function dlvFail(msg){dlvClear();toast(msg);}
+function dlvAccept(id){
+  if(DLV.cur){toast('Ya tienes un encargo activo');return;}
+  var o=null;DLV.offers.forEach(function(q){if(q.id===+id)o=q;});if(!o)return;
+  var p=person(o.shirt,o.hair,.7);p.position.set(cx(CITY,o.rc[0]),0,cz(CITY,o.rc[1]));p.rotation.y=rnd(0,6.28);
+  p.add(nameSprite(o.name,'#ffd24a',2.2,.55,1.75));p.add(sprite('📦',2.35,.9));CITY.g.add(p);
+  DLV.offers=DLV.offers.filter(function(q){return q!==o;});
+  o.npc=p;o.left=o.limit;o.st='buy';o.prov=PROV;o.itemId='ord'+o.id;DLV.cur=o;
+  toast('🛵 Encargo aceptado: ¡tienes '+mmss(o.limit)+'!');phone('dlv');
+}
+function dlvPick(){
+  var o=DLV.cur;
+  openSheet('menu','<div class="pn-title">🍕 Pizzería · Pedido de '+esc(o.name)+'</div><div class="pn-card"><div class="pn-row"><span>Pedido</span><b>'+foodTxt(o)+'</b></div><div class="pn-row"><span>Precio</span><b>'+fmt(o.cost)+' CUP</b></div><div class="pn-row"><span>Tu saldo</span><b>💰 '+fmt(money)+' CUP</b></div><div class="pn-row"><span>⏱ Tiempo</span><b>'+mmss(o.left)+'</b></div><button class="go" data-do="dlvbuy"'+(money<o.cost?' disabled':'')+'>'+(money<o.cost?'Sin dinero suficiente':'Comprar pedido')+'</button></div><button class="go" data-do="dlvmenu" style="background:#243170">Ver menú normal</button>');
+}
+var _om=openMenu;openMenu=function(k){if(k==='pz'&&DLV.cur&&DLV.cur.st==='buy'){dlvPick();return;}_om(k);};
+function dlvGive(){
+  var o=DLV.cur;if(!o||o.st!=='go')return;
+  var fr=clamp(o.left/o.limit,0,1),tip=r10(o.tipBase*(.6+1.2*fr)),pay=o.cost+tip;
+  invTake(o.itemId,1);money+=pay;DLV.done++;DLV.earned+=tip;sfx('coin');
+  var p=o.npc;p.rotation.y=Math.atan2(sim.position.x-p.position.x,sim.position.z-p.position.z);
+  setTimeout(function(){if(p.parent)p.parent.remove(p);},2500);
+  DLV.cur=null;give.style.display='none';hud.style.display='none';
+  toast('✅ Entregado a '+o.name+' · +'+fmt(pay)+' CUP (propina '+fmt(tip)+')');
+}
+give.onclick=dlvGive;
+
+$('panel').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b||!b.dataset.do)return;var x=b.dataset.do,v=b.dataset.v,o=DLV.cur;
+  if(x==='dlvacc')dlvAccept(v);
+  else if(x==='dlvnew'){DLV.offers=[];dlvGen();phone('dlv');}
+  else if(x==='dlvcancel'){dlvFail('Cancelaste el encargo');phone('dlv');}
+  else if(x==='dlvmenu')_om('pz');
+  else if(x==='dlvbuy'){
+    if(!o||o.st!=='buy')return;if(money<o.cost){toast('No te alcanza el dinero');return;}
+    money-=o.cost;sfx('coin');o.st='go';
+    invAdd({id:o.itemId,e:'📦',n:foodTxt(o),cat:'pedidos',q:1,note:'Para '+o.name});
+    closeSheet();toast('📦 Pedido guardado en el inventario. ¡Llévalo a '+o.name+'!');
+  }
+  else if(x==='itab'){INVTAB=v;invOpen();}
+  else if(x==='icl'){var c=CLO.filter(function(q){return q[1]===v;})[0];if(!c||!CL.own[v])return;
+    if(CL.eq[c[0]]===v){CL.eq[c[0]]=null;setAcc(c[0],null);}else{CL.eq[c[0]]=v;setAcc(c[0],v);}
+    invOpen();saveGame();}
+  else if(x==='iuse'){
+    if(act||trip){toast('Ahora no puedes');return;}
+    var it=INV.items.filter(function(q){return q.id===v;})[0];if(!it||!it.eff)return;
+    invTake(v,1);closeSheet();hp=[sim.position.x,sim.position.z];
+    act={k:{l:'Comiendo: '+it.n,dur:it.dur||3,eff:it.eff},t:0};sfx('eat');
+  }
+});
+
+// reloj y HUD del encargo (se pausa con el menú o la pestaña oculta)
+var last=performance.now();
+setInterval(function(){
+  var now=performance.now(),dt=Math.min(.5,(now-last)/1000);last=now;
+  if(document.hidden||(menu&&!menu.hidden))return;
+  var o=DLV.cur;
+  if(!o){hud.style.display='none';give.style.display='none';return;}
+  if(PROV!==o.prov||!o.npc.parent){dlvFail('Encargo cancelado');return;}
+  o.left-=dt;
+  if(o.left<=0){dlvFail('⏰ Se acabó el tiempo: pierdes el encargo de '+o.name);return;}
+  var txt='🛵 '+o.name+' · ⏱ '+mmss(o.left)+'<br>',near=false;
+  if(o.st==='buy'){
+    var pz=dlvPz(),r=dlvRef();
+    txt+=cur===CITY&&pz?'🍕 Ve a la pizzería y compra el pedido · '+Math.round(Math.hypot(pz.x-r.x,pz.z-r.z))+' m':'🍕 Compra el pedido en el mostrador';
+  }else if(cur===CITY){
+    var d=Math.hypot(o.npc.position.x-sim.position.x,o.npc.position.z-sim.position.z);near=d<2.8;
+    txt+='📍 Entrega el pedido · '+Math.round(d)+' m';
+  }else txt+='📍 Sal del edificio y busca a '+o.name;
+  hud.innerHTML=txt;hud.style.display='block';
+  give.textContent='📦 Entregar a '+o.name;give.style.display=near?'block':'none';
+},250);
+
+// guardado propio del inventario y de Deliveri
+function invKey(){return SK+'.inv';}
+function invLoad(){
+  INV={items:[]};DLV.done=0;DLV.earned=0;DLV.offers=[];if(DLV.cur)dlvClear();
+  try{var d=JSON.parse(localStorage.getItem(invKey())||'null');if(d){INV.items=(d.items||[]).filter(function(i){return i.cat!=='pedidos';});DLV.done=d.done||0;DLV.earned=d.earned||0;}}catch(e){}
+}
+function invSave(){if(RESET)return;try{localStorage.setItem(invKey(),JSON.stringify({items:INV.items.filter(function(i){return i.cat!=='pedidos';}),done:DLV.done,earned:DLV.earned}));}catch(e){}}
+var wasShown=true,tk=0;
+setInterval(function(){var hid=menu&&menu.hidden;if(hid&&wasShown)invLoad();wasShown=!hid;if(hid&&++tk%3===0)invSave();},1000);
+})();
+
 })();
 </script>
 
